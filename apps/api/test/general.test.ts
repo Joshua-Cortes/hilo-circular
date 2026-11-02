@@ -32,6 +32,19 @@ describe("API general", () => {
     expect(json.status).toBe(400);
     expect(json.body.error.codigo).toBe("json_invalido");
   });
+
+  it("con la base vacía el impacto parte en cero", async () => {
+    const res = await entorno.api().get("/api/impacto");
+    expect(res.body.datos).toEqual({
+      oficiosActivos: 0,
+      puntosDonacion: 0,
+      contactosReparacion: 0,
+      donacionesRecibidas: 0,
+      donacionesPendientes: 0,
+      prendasDonadas: 0,
+      kgTextilRecuperados: 0,
+    });
+  });
 });
 
 describe("Orientación: ¿qué hago con esta prenda?", () => {
