@@ -5,9 +5,12 @@ import { config } from "./config.js";
 import type { Db } from "./db/client.js";
 import { manejadorErrores, rutaNoEncontrada } from "./middleware/errores.js";
 import { rutasCatalogo } from "./modules/catalogo/rutas.js";
+import { rutasDonaciones } from "./modules/donaciones/rutas.js";
+import { rutasFundaciones } from "./modules/fundaciones/rutas.js";
+import { rutasImpacto } from "./modules/impacto/rutas.js";
+import { rutasOficios } from "./modules/oficios/rutas.js";
 import { rutasOrientacion } from "./modules/orientacion/rutas.js";
 
-// biome-ignore lint/correctness/noUnusedFunctionParameters: los módulos de recursos usarán db (#12)
 export function crearApp(db: Db) {
   const app = express();
 
@@ -22,6 +25,10 @@ export function crearApp(db: Db) {
 
   app.use("/api/catalogo", rutasCatalogo());
   app.use("/api/orientacion", rutasOrientacion());
+  app.use("/api/oficios", rutasOficios(db));
+  app.use("/api/fundaciones", rutasFundaciones(db));
+  app.use("/api/donaciones", rutasDonaciones(db));
+  app.use("/api/impacto", rutasImpacto(db));
 
   app.use(rutaNoEncontrada);
   app.use(manejadorErrores);
