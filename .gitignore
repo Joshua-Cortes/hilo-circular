@@ -11,3 +11,4 @@ Thumbs.db
 apps/api/.data/
 # Skills locales de Claude Code (cada integrante las instala en su máquina)
 .claude/
+*.tsbuildinfo
