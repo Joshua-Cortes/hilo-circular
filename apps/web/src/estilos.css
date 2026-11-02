@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/*
+ * Tokens del sistema de diseño de Hilo Circular (ver docs/06-sistema-de-diseno.md).
+ * Todos los pares de texto/fondo cumplen WCAG 2.2 AA; terracota sobre crema solo
+ * se usa en texto grande, íconos o rellenos con texto blanco.
+ */
+@theme {
+  --font-display: "Fraunces Variable", Georgia, "Times New Roman", serif;
+  --font-sans: "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+
+  --color-crema: #f4efe6;
+  --color-papel: #fbf8f2;
+  --color-bosque: #1e3329;
+  --color-bosque-800: #2a4537;
+  --color-tinta-suave: #545b52;
+  --color-terracota: #b4552f;
+  --color-terracota-tinta: #9a4528;
+  --color-terracota-claro: #e9b79f;
+  --color-salvia: #3d6852;
+  --color-salvia-claro: #dce6dd;
+  --color-borde: #d9cfbf;
+  --color-borde-fuerte: #8c8273;
+
+  --radius-tarjeta: 1.25rem;
+  --ease-hilo: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    /* Base de 18 px: pensada para personas mayores y lectura en celular. */
+    font-size: 112.5%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-crema font-sans text-bosque antialiased;
+    line-height: 1.55;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display text-balance;
+    font-variation-settings:
+      "SOFT" 60,
+      "WONK" 0;
+    letter-spacing: -0.015em;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-terracota);
+    outline-offset: 3px;
+    border-radius: 0.375rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      /* biome-ignore lint/complexity/noImportantStyles: debe ganarle a cualquier transición declarada */
+      animation-duration: 0.01ms !important;
+      /* biome-ignore lint/complexity/noImportantStyles: debe ganarle a cualquier transición declarada */
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Línea de puntada: el motivo gráfico de la marca. */
+@utility puntada {
+  background-image: linear-gradient(to right, currentColor 55%, transparent 0);
+  background-size: 14px 2px;
+  background-repeat: repeat-x;
+  height: 2px;
+}
+
+@utility tarjeta {
+  @apply rounded-tarjeta border border-borde bg-papel;
+}
+
+@utility boton {
+  @apply inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full px-6 font-bold transition-colors duration-200 ease-hilo;
+}
+
+@utility boton-primario {
+  @apply boton bg-terracota text-white hover:bg-terracota-tinta;
+}
+
+@utility boton-secundario {
+  @apply boton border-2 border-bosque text-bosque hover:bg-bosque hover:text-crema;
+}

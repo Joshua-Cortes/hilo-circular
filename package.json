@@ -1,0 +1,25 @@
+{
+  "name": "hilo-circular",
+  "private": true,
+  "description": "Plataforma de economía circular textil para La Serena y Coquimbo: reparar, donar y conectar.",
+  "workspaces": [
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c yellow,green \"npm run dev -w @hilo/api\" \"npm run dev -w @hilo/web\"",
+    "dev:api": "npm run dev -w @hilo/api",
+    "dev:web": "npm run dev -w @hilo/web",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "biome check .",
+    "format": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.4",
+    "concurrently": "^10.0.6"
+  }
+}

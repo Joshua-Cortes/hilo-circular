@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+# Base de datos local embebida (PGlite)
+apps/api/.data/
+# Skills locales de Claude Code (cada integrante las instala en su máquina)
+.claude/
