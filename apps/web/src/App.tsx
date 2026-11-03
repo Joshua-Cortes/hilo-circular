@@ -3,6 +3,8 @@ import { Link, Route, Routes } from "react-router";
 import { CifrasImpacto } from "./componentes/CifrasImpacto";
 import { Marco } from "./componentes/Marco";
 import { Inicio } from "./paginas/Inicio";
+import { PerfilOficio } from "./paginas/PerfilOficio";
+import { Reparar } from "./paginas/Reparar";
 
 /** Marcador para las pantallas que se construyen en los issues de cada integrante. */
 function EnConstruccion({ titulo, issue, responsable }: { titulo: string; issue: string; responsable: string }) {
@@ -51,10 +53,8 @@ export function App() {
     <Marco>
       <Routes>
         <Route path="/" element={<Inicio />} />
-        <Route
-          path="/reparar"
-          element={<EnConstruccion titulo="Reparar" issue="módulo de búsqueda" responsable="Bastian" />}
-        />
+        <Route path="/reparar" element={<Reparar />} />
+        <Route path="/reparar/:id" element={<PerfilOficio />} />
         <Route
           path="/donar"
           element={<EnConstruccion titulo="Donar" issue="mapa de donación" responsable="Hector" />}

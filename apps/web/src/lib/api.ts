@@ -27,6 +27,52 @@ export type Impacto = {
   kgTextilRecuperados: number;
 };
 
+export type ServicioPublico = {
+  id: string;
+  categoria: string;
+  titulo: string;
+  descripcion: string;
+  prendas: string[];
+  precioDesde: number | null;
+};
+
+export type OficioPublico = {
+  id: string;
+  nombrePublico: string;
+  descripcion: string;
+  comuna: string;
+  direccion: string | null;
+  ubicacion: {
+    lat: number;
+    lng: number;
+    precision: "exacta" | "aproximada";
+  };
+  distanciaKm: number | null;
+  canales: {
+    whatsapp: boolean;
+    telefono: boolean;
+  };
+  verificado: boolean;
+  servicios: ServicioPublico[];
+};
+
+export type FiltrosOficios = {
+  lat?: number;
+  lng?: number;
+  radioKm?: number;
+  categoria?: string;
+  prenda?: string;
+  q?: string;
+  limite?: number;
+};
+
+export type CanalContacto = "whatsapp" | "telefono";
+
+export type RespuestaContacto = {
+  canal: CanalContacto;
+  url: string;
+};
+
 export class ErrorApi extends Error {
   constructor(
     readonly status: number,
@@ -67,4 +113,24 @@ export const api = {
   impacto: () => pedir<Impacto>("/impacto"),
   orientacion: (prenda: string, estado: string) =>
     pedir<Recomendacion>(`/orientacion?${new URLSearchParams({ prenda, estado })}`),
+  oficios: (filtros: FiltrosOficios = {}) => {
+    const params = new URLSearchParams();
+    if (filtros.lat !== undefined && filtros.lng !== undefined) {
+      params.set("lat", String(filtros.lat));
+      params.set("lng", String(filtros.lng));
+    }
+    if (filtros.radioKm !== undefined) params.set("radioKm", String(filtros.radioKm));
+    if (filtros.categoria) params.set("categoria", filtros.categoria);
+    if (filtros.prenda) params.set("prenda", filtros.prenda);
+    if (filtros.q && filtros.q.trim().length >= 2) params.set("q", filtros.q.trim());
+    if (filtros.limite !== undefined) params.set("limite", String(filtros.limite));
+    const qs = params.toString();
+    return pedir<OficioPublico[]>(qs ? `/oficios?${qs}` : "/oficios");
+  },
+  oficio: (id: string) => pedir<OficioPublico>(`/oficios/${encodeURIComponent(id)}`),
+  contactarOficio: (id: string, canal: CanalContacto) =>
+    pedir<RespuestaContacto>(`/oficios/${encodeURIComponent(id)}/contacto`, {
+      method: "POST",
+      body: JSON.stringify({ canal }),
+    }),
 };
