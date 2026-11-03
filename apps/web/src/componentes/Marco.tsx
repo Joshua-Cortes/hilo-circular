@@ -6,6 +6,7 @@ const ENLACES = [
   { a: "/reparar", texto: "Reparar" },
   { a: "/donar", texto: "Donar" },
   { a: "/impacto", texto: "Impacto" },
+  { a: "/mi-taller", texto: "Soy oficio" },
 ];
 
 export function Logo() {
