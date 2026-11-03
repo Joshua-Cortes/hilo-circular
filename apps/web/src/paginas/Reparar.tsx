@@ -232,11 +232,9 @@ export function Reparar() {
         {/* Filtro por comuna y radio */}
         <div className="mt-6 border-t border-borde pt-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <span id="etiqueta-comuna" className="block text-sm font-bold tracking-wider text-tinta-suave uppercase">
-                Comuna
-              </span>
-              <div role="group" aria-labelledby="etiqueta-comuna" className="mt-2 flex flex-wrap gap-2">
+            <fieldset className="border-0 p-0">
+              <legend className="block text-sm font-bold tracking-wider text-tinta-suave uppercase">Comuna</legend>
+              <div className="mt-2 flex flex-wrap gap-2">
                 <ChipFiltro activo={comunaActiva === ""} onClick={() => actualizarParametro("comuna", "")}>
                   Todas
                 </ChipFiltro>
@@ -250,14 +248,14 @@ export function Reparar() {
                   </ChipFiltro>
                 ))}
               </div>
-            </div>
+            </fieldset>
 
             {coordenadasEfectivas && (
-              <div>
-                <span id="etiqueta-radio" className="block text-sm font-bold tracking-wider text-tinta-suave uppercase">
+              <fieldset className="border-0 p-0">
+                <legend className="block text-sm font-bold tracking-wider text-tinta-suave uppercase">
                   Distancia máxima
-                </span>
-                <div role="group" aria-labelledby="etiqueta-radio" className="mt-2 flex flex-wrap gap-2">
+                </legend>
+                <div className="mt-2 flex flex-wrap gap-2">
                   {RADIOS_DISPONIBLES.map((r) => (
                     <ChipFiltro
                       key={r}
@@ -268,17 +266,15 @@ export function Reparar() {
                     </ChipFiltro>
                   ))}
                 </div>
-              </div>
+              </fieldset>
             )}
           </div>
         </div>
 
         {/* Filtro por categoría de oficio */}
-        <div className="mt-5 border-t border-borde pt-5">
-          <span id="etiqueta-categoria" className="block text-sm font-bold tracking-wider text-tinta-suave uppercase">
-            Tipo de oficio
-          </span>
-          <div role="group" aria-labelledby="etiqueta-categoria" className="mt-2 flex flex-wrap gap-2">
+        <fieldset className="mt-5 border-t border-borde p-0 pt-5">
+          <legend className="block text-sm font-bold tracking-wider text-tinta-suave uppercase">Tipo de oficio</legend>
+          <div className="mt-2 flex flex-wrap gap-2">
             <ChipFiltro activo={categoriaActiva === ""} onClick={() => actualizarParametro("categoria", "")}>
               Todos los oficios
             </ChipFiltro>
@@ -292,14 +288,14 @@ export function Reparar() {
               </ChipFiltro>
             ))}
           </div>
-        </div>
+        </fieldset>
 
         {/* Filtro por tipo de prenda */}
-        <div className="mt-5 border-t border-borde pt-5">
-          <span id="etiqueta-prenda" className="block text-sm font-bold tracking-wider text-tinta-suave uppercase">
+        <fieldset className="mt-5 border-t border-borde p-0 pt-5">
+          <legend className="block text-sm font-bold tracking-wider text-tinta-suave uppercase">
             Prenda que quieres arreglar
-          </span>
-          <div role="group" aria-labelledby="etiqueta-prenda" className="mt-2 flex flex-wrap gap-2">
+          </legend>
+          <div className="mt-2 flex flex-wrap gap-2">
             <ChipFiltro activo={prendaActiva === ""} onClick={() => actualizarParametro("prenda", "")}>
               Cualquier prenda
             </ChipFiltro>
@@ -313,7 +309,7 @@ export function Reparar() {
               </ChipFiltro>
             ))}
           </div>
-        </div>
+        </fieldset>
 
         {hayFiltrosActivos && (
           <div className="mt-5 flex justify-end border-t border-borde pt-4">
