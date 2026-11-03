@@ -45,7 +45,7 @@ export function MiTaller() {
 
   const [catalogo, setCatalogo] = useState<Catalogo | null>(null);
   const [perfilExistente, setPerfilExistente] = useState<MiOficio | null>(null);
-  const [cargandoInicial, setCargandoInicial] = useState(Boolean(sesion && sesion.rol === "oficio"));
+  const [cargandoInicial, setCargandoInicial] = useState(sesion?.rol === "oficio");
   const [paso, setPaso] = useState<PasoFormulario>(1);
 
   // Campos del formulario de perfil (CU3)
@@ -82,7 +82,7 @@ export function MiTaller() {
   }, []);
 
   useEffect(() => {
-    if (!sesion || sesion.rol !== "oficio") return;
+    if (sesion?.rol !== "oficio") return;
     setCargandoInicial(true);
     api
       .miOficio()
@@ -285,7 +285,7 @@ export function MiTaller() {
   }
 
   // Ruta protegida por rol ("oficio")
-  if (!sesion || sesion.rol !== "oficio") {
+  if (sesion?.rol !== "oficio") {
     return (
       <section className="mx-auto max-w-3xl px-5 py-16" aria-labelledby="titulo-acceso-oficio">
         <div className="tarjeta p-8 md:p-10">
