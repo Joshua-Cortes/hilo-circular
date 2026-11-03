@@ -14,13 +14,14 @@ El control oficial del avance semanal se lleva en los **issues y milestones de G
 | 17–23 nov | Pulido de la interfaz y versión móvil | Pruebas con usuarios reales | Corrección de errores | Versión casi final |
 | 24–26 nov | Documentación final | Preparación de la entrega y la presentación | Video demo final | Entrega final (26 nov) |
 
-## Estado real al 1 de noviembre
+## Estado real al 3 de noviembre
 
 | Semana | Planificado | Real | Desvío |
 |---|---|---|---|
 | 14–19 oct | Hito 1 | Presentación entregada el 15 oct | Al día |
-| 20–26 oct | Mockups y modelo de datos | No se avanzó en esa semana | **Atraso de una semana** |
-| 27 oct–2 nov | Proyecto base | Repositorio, CI, API completa con 44 tests, modelo de datos, base del frontend, mockup de donación y documentación | Se recupera el atraso del backend y se adelantan tareas del 3–9 y del 10–16 nov |
+| 20–26 oct | Mockups y modelo de datos | No se avanzó en esa semana (recuperado el 2 nov con mockups CU1/CU2/CU3 y modelo ER) | Recuperado |
+| 27 oct–2 nov | Proyecto base | Repositorio, CI, API completa con 44 tests, modelo de datos, configuración UI y mockups completos | Al día |
+| 3–9 nov | Módulo 1 | Pantalla `/reparar` (búsqueda, filtros y perfil CU1), formulario `/mi-taller` (CU3) y endpoints listos | Adelantado |
 
 ### Lo que se adelantó (1 nov)
 

@@ -3,6 +3,7 @@ import { Link, Route, Routes } from "react-router";
 import { CifrasImpacto } from "./componentes/CifrasImpacto";
 import { Marco } from "./componentes/Marco";
 import { Inicio } from "./paginas/Inicio";
+import { MiTaller } from "./paginas/MiTaller";
 import { PerfilOficio } from "./paginas/PerfilOficio";
 import { Reparar } from "./paginas/Reparar";
 
@@ -55,6 +56,7 @@ export function App() {
         <Route path="/" element={<Inicio />} />
         <Route path="/reparar" element={<Reparar />} />
         <Route path="/reparar/:id" element={<PerfilOficio />} />
+        <Route path="/mi-taller" element={<MiTaller />} />
         <Route
           path="/donar"
           element={<EnConstruccion titulo="Donar" issue="mapa de donación" responsable="Hector" />}
