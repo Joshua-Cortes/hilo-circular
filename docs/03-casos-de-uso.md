@@ -26,9 +26,9 @@ flowchart LR
 | CU | Responsable de la interfaz | Endpoints (API lista) | Mockup |
 |---|---|---|---|
 | CU0 | Base del proyecto (hecho) | `GET /orientacion`, `GET /catalogo` | Implementado en la pantalla de inicio |
-| CU1 | Bastian | `GET /oficios`, `GET /oficios/:id`, `POST /oficios/:id/contacto` | Pendiente (Bastian) |
+| CU1 | Bastian | `GET /oficios`, `GET /oficios/:id`, `POST /oficios/:id/contacto` | [mockups/oficios.html](mockups/oficios.html) |
 | CU2 | Hector (mapa) y Joshua (flujo) | `GET /fundaciones`, `POST /donaciones` | [mockups/donar.html](mockups/donar.html) |
-| CU3 | Bastian | `POST /oficios`, `PATCH /oficios/yo`, `/oficios/yo/servicios` | Pendiente (Bastian) |
+| CU3 | Bastian | `POST /oficios`, `PATCH /oficios/yo`, `/oficios/yo/servicios` | [mockups/oficios.html](mockups/oficios.html) |
 | CU4 | Hector | `/auth/*` (pendiente), middleware `requiereSesion` (hecho) | — |
 | CU5 | Hector | `PATCH /fundaciones/yo`, `GET /donaciones/mias`, `PATCH /donaciones/:id/recepcion` | — |
 | CU6 | Base del proyecto (hecho) | `GET /impacto` | Implementado en inicio y en `/impacto` |

@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup CU1 y CU3 · Búsqueda y perfil de oficios — Hilo Circular</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght,SOFT@9..144,400..700,0..100&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root {
+    --crema: #f4efe6; --papel: #fbf8f2; --bosque: #1e3329; --bosque-800: #2a4537;
+    --tinta-suave: #545b52; --terracota: #b4552f; --terracota-tinta: #9a4528; --terracota-claro: #e9b79f;
+    --salvia: #3d6852; --salvia-claro: #dce6dd; --borde: #d9cfbf; --borde-fuerte: #8c8273;
+    --display: "Fraunces", Georgia, serif; --sans: "Atkinson Hyperlegible", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: #e9e2d6; color: var(--bosque); font-family: var(--sans); font-size: 18px; line-height: 1.5; }
+  h1, h2, h3 { font-family: var(--display); font-variation-settings: "SOFT" 60; letter-spacing: -0.015em; text-wrap: balance; }
+  .icono { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ——— Página de presentación del mockup ——— */
+  .portada { max-width: 1180px; margin: 0 auto; padding: 48px 24px 8px; }
+  .portada .sobre { font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--terracota-tinta); font-size: 14px; }
+  .portada h1 { font-size: clamp(36px, 5vw, 56px); line-height: 1.05; margin-top: 10px; font-weight: 600; }
+  .portada p { max-width: 780px; color: var(--tinta-suave); margin-top: 14px; }
+  .puntada { height: 2px; width: 120px; margin-top: 22px; color: var(--terracota);
+    background-image: linear-gradient(to right, currentColor 55%, transparent 0); background-size: 14px 2px; }
+  .leyenda { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 22px; font-size: 15px; color: var(--tinta-suave); }
+  .leyenda span { display: inline-flex; align-items: center; gap: 8px; }
+
+  .pantallas { max-width: 1180px; margin: 0 auto; padding: 32px 24px 64px; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 40px 28px; align-items: start; }
+  .columna h2 { font-size: 22px; font-weight: 600; margin-bottom: 14px; display: flex; gap: 10px; align-items: baseline; }
+  .columna h2 small { font-family: var(--sans); font-size: 14px; font-weight: 700; color: var(--terracota-tinta); letter-spacing: .1em; }
+
+  /* ——— Marco de teléfono ——— */
+  .telefono { width: 360px; max-width: 100%; height: 760px; margin: 0 auto; background: var(--crema); border-radius: 40px;
+    border: 10px solid var(--bosque); box-shadow: 0 30px 60px -30px rgba(30,51,41,.55); overflow: hidden; display: flex; flex-direction: column; position: relative; }
+  .estado-sistema { height: 30px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 22px; font-size: 13px; font-weight: 700; }
+  .barra { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 4px 12px 10px; }
+  .barra-izq { display: flex; align-items: center; gap: 6px; }
+  .barra h3 { font-size: 21px; font-weight: 600; }
+  .boton-icono { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 50%; border: 0; background: transparent; color: var(--bosque); cursor: pointer; }
+  .boton-icono:hover { background: var(--salvia-claro); }
+  .desplazable { flex: 1; overflow-y: auto; scrollbar-width: none; }
+  .desplazable::-webkit-scrollbar { display: none; }
+
+  /* ——— Pantalla 1: Buscar oficio (Reparar) ——— */
+  .buscador-caja { padding: 0 16px 10px; }
+  .buscador-label { display: block; font-size: 14px; font-weight: 700; color: var(--bosque); margin-bottom: 4px; }
+  .buscador-input-wrap { position: relative; display: flex; align-items: center; }
+  .buscador-input-wrap .icono-buscar { position: absolute; left: 14px; color: var(--tinta-suave); pointer-events: none; }
+  .buscador-input { width: 100%; min-height: 48px; padding: 0 14px 0 42px; border-radius: 14px; border: 2px solid var(--borde-fuerte); background: var(--papel); font: 400 16px var(--sans); color: var(--bosque); }
+  .buscador-input::placeholder { color: var(--tinta-suave); }
+
+  .chips-titulo { padding: 2px 16px 6px; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-suave); }
+  .chips { display: flex; gap: 8px; padding: 0 16px 10px; overflow-x: auto; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { flex-shrink: 0; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 2px solid var(--borde-fuerte); background: var(--papel); font: 700 15px var(--sans); color: var(--bosque); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--bosque); border-color: var(--bosque); color: var(--crema); }
+
+  .selector-estado-demo { margin: 0 16px 10px; padding: 6px; background: var(--papel); border: 1px dashed var(--borde-fuerte); border-radius: 12px; display: flex; gap: 4px; }
+  .selector-estado-demo button { flex: 1; min-height: 36px; border: 0; border-radius: 8px; background: transparent; font: 700 13px var(--sans); color: var(--tinta-suave); cursor: pointer; }
+  .selector-estado-demo button[aria-pressed="true"] { background: var(--terracota); color: #fff; }
+
+  .lista-oficios { list-style: none; padding: 4px 16px 24px; display: grid; gap: 12px; }
+  .tarjeta-oficio { background: var(--papel); border: 1px solid var(--borde); border-radius: 18px; padding: 14px 16px; cursor: pointer; transition: border-color .2s; }
+  .tarjeta-oficio:hover { border-color: var(--bosque); }
+  .tarjeta-oficio .cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .tarjeta-oficio h4 { font: 700 18px/1.25 var(--sans); color: var(--bosque); }
+  .distancia-pill { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; background: var(--salvia-claro); color: var(--bosque); font: 700 14px var(--sans); padding: 4px 10px; border-radius: 999px; }
+  .insignia-verificado { display: inline-flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 700; color: var(--salvia); margin-top: 3px; }
+  .insignia-verificado .icono { width: 16px; height: 16px; }
+  .comuna-linea { font-size: 15px; color: var(--tinta-suave); margin-top: 2px; }
+  .servicios-mini { list-style: none; padding: 0; margin-top: 10px; border-top: 1px dashed var(--borde); padding-top: 8px; display: grid; gap: 5px; }
+  .servicios-mini li { display: flex; justify-content: space-between; font-size: 15px; gap: 8px; }
+  .servicios-mini .precio { font-weight: 700; color: var(--terracota-tinta); white-space: nowrap; }
+
+  .estado-vacio, .estado-error { margin: 8px 16px 20px; border-radius: 18px; padding: 20px 16px; text-align: left; }
+  .estado-vacio { background: var(--papel); border: 2px dashed var(--borde-fuerte); }
+  .estado-error { background: #f7e3d8; border: 2px solid var(--terracota-tinta); }
+  .estado-vacio h4, .estado-error h4 { font: 700 18px/1.3 var(--sans); margin-top: 8px; }
+  .estado-vacio p, .estado-error p { font-size: 15px; color: var(--tinta-suave); margin: 6px 0 14px; }
+
+  /* ——— Pantalla 2: Perfil de oficio ——— */
+  .portada-oficio { margin: 0 16px; border-radius: 22px; background: var(--bosque); color: var(--crema); padding: 18px 20px; position: relative; overflow: hidden; }
+  .portada-oficio::after { content: ""; position: absolute; right: -65px; top: -75px; width: 160px; height: 160px; border-radius: 50%; border: 2px dashed var(--terracota-claro); opacity: .6; }
+  .verificado { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--terracota-claro); margin-bottom: 6px; }
+  .verificado .icono { width: 18px; height: 18px; }
+  .portada-oficio h3 { font-size: 25px; line-height: 1.1; font-weight: 600; }
+  .portada-oficio .bio { font-size: 15px; color: rgba(244,239,230,.9); margin-top: 8px; line-height: 1.4; }
+  .portada-oficio .meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 14px; color: var(--terracota-claro); font-weight: 700; margin-top: 10px; }
+  .portada-oficio .meta span { display: inline-flex; align-items: center; gap: 4px; }
+
+  .bloque { margin: 14px 16px 0; }
+  .bloque h4 { font: 700 13px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-suave); margin-bottom: 8px; }
+  .servicio-card { background: var(--papel); border: 1px solid var(--borde); border-radius: 16px; padding: 12px 14px; margin-bottom: 8px; }
+  .servicio-card .fila { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .servicio-card h5 { font: 700 17px var(--sans); }
+  .servicio-card .precio { font: 700 16px var(--sans); color: var(--terracota-tinta); }
+  .servicio-card .etiquetas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .servicio-card .etiqueta { font-size: 13px; background: var(--crema); border: 1px solid var(--borde); border-radius: 999px; padding: 2px 10px; color: var(--tinta-suave); }
+
+  #mapa-oficio { height: 156px; border-radius: 16px; border: 1px solid var(--borde); z-index: 0; }
+  .aviso-privacidad { margin-top: 8px; background: var(--salvia-claro); border-radius: 12px; padding: 8px 12px; font-size: 14px; color: var(--bosque); display: flex; gap: 8px; align-items: flex-start; line-height: 1.35; }
+  .aviso-privacidad .icono { width: 18px; height: 18px; color: var(--salvia); margin-top: 1px; }
+
+  .acciones { position: relative; padding: 12px 16px 16px; border-top: 1px solid var(--borde); background: var(--crema); display: grid; gap: 8px; flex-shrink: 0; }
+  .boton { min-height: 52px; border-radius: 999px; border: 0; font: 700 17px var(--sans); display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background-color .2s cubic-bezier(.22,1,.36,1); text-decoration: none; padding: 0 18px; }
+  .boton-primario { background: var(--terracota); color: #fff; }
+  .boton-primario:hover { background: var(--terracota-tinta); }
+  .boton-secundario { background: transparent; color: var(--bosque); border: 2px solid var(--bosque); min-height: 48px; font-size: 16px; }
+  .boton-secundario:hover { background: var(--bosque); color: var(--crema); }
+  .boton-whatsapp { background: var(--salvia); color: #fff; }
+  .boton-whatsapp:hover { background: var(--bosque); }
+
+  /* ——— Pantalla 3: Crear perfil de oficio (CU3) ——— */
+  .progreso { padding: 0 16px; }
+  .progreso p { font-size: 14px; font-weight: 700; letter-spacing: .1em; color: var(--terracota-tinta); text-transform: uppercase; }
+  .progreso div { display: flex; gap: 6px; margin-top: 6px; }
+  .progreso i { flex: 1; height: 6px; border-radius: 99px; background: var(--borde); }
+  .progreso i.lleno { background: var(--terracota); }
+  .pregunta { font-size: 24px; font-weight: 600; padding: 12px 16px 4px; line-height: 1.15; }
+  .ayuda-paso { padding: 0 16px 10px; font-size: 15px; color: var(--tinta-suave); }
+
+  .campo-grupo { padding: 0 16px 12px; }
+  .campo-label { display: block; font: 700 16px var(--sans); color: var(--bosque); margin-bottom: 4px; }
+  .campo-pista { display: block; font-size: 14px; color: var(--tinta-suave); margin-bottom: 6px; }
+  .campo-input { width: 100%; min-height: 50px; border-radius: 14px; border: 2px solid var(--borde-fuerte); background: var(--papel); padding: 0 14px; font: 700 17px var(--sans); color: var(--bosque); }
+  .prefijo-fono { display: flex; gap: 8px; align-items: center; }
+  .prefijo-caja { min-height: 50px; padding: 0 12px; border-radius: 14px; border: 2px solid var(--borde); background: var(--salvia-claro); font: 700 16px var(--sans); display: grid; place-items: center; white-space: nowrap; }
+
+  .opciones-privacidad { display: grid; gap: 8px; padding: 0 16px 12px; }
+  .opcion-radio { background: var(--papel); border: 2px solid var(--borde-fuerte); border-radius: 16px; padding: 12px 14px; text-align: left; cursor: pointer; display: grid; grid-template-columns: 24px 1fr; gap: 10px; align-items: start; }
+  .opcion-radio[aria-checked="true"] { border-color: var(--bosque); background: var(--salvia-claro); }
+  .circulo-radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--bosque); display: grid; place-items: center; margin-top: 2px; background: var(--papel); }
+  .opcion-radio[aria-checked="true"] .circulo-radio::after { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--terracota); }
+  .opcion-radio b { display: block; font: 700 16px var(--sans); color: var(--bosque); }
+  .opcion-radio span { display: block; font-size: 14px; color: var(--tinta-suave); margin-top: 2px; line-height: 1.35; }
+
+  /* ——— Anotaciones ——— */
+  .notas { list-style: none; padding: 0; margin: 18px auto 0; max-width: 360px; display: grid; gap: 10px; counter-reset: nota; }
+  .notas li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; font-size: 15px; line-height: 1.45; color: var(--tinta-suave); }
+  .notas li::before { counter-increment: nota; content: counter(nota); width: 26px; height: 26px; border-radius: 50%; background: var(--terracota); color: #fff; font-weight: 700; font-size: 13px; display: grid; place-items: center; }
+  .notas b { color: var(--bosque); }
+  .marca { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: var(--terracota); color: #fff; font: 700 12px/24px var(--sans); text-align: center; box-shadow: 0 0 0 3px var(--crema); z-index: 5; pointer-events: none; }
+
+  :focus-visible { outline: 3px solid var(--terracota); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-atras" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-buscar" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 5-5.5 10.2-7.4 11.8a1 1 0 0 1-1.2 0C9.5 20.2 4 15 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-tijeras" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></symbol>
+  <symbol id="i-verificado" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-mensaje" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+  <symbol id="i-telefono" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+  <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></symbol>
+  <symbol id="i-alerta" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
+</svg>
+
+<header class="portada">
+  <p class="sobre">Hilo Circular · Mockup de alta fidelidad · CU1 y CU3</p>
+  <h1>Reparar con un oficio <em style="font-weight:400;color:var(--salvia);margin-right:.12em">cercano</em> y sin barreras digitales</h1>
+  <div class="puntada" aria-hidden="true"></div>
+  <p>Flujo para buscar talleres de barrio por cercanía (<strong>CU1</strong>), revisar sus precios referenciales con privacidad de ubicación y contactarlos por WhatsApp, más el formulario guiado para que una costurera o zapatero adulto mayor publique su taller paso a paso (<strong>CU3</strong>).</p>
+  <div class="leyenda">
+    <span><svg class="icono" style="color:var(--salvia)"><use href="#i-verificado"/></svg> Taller verificado por el equipo</span>
+    <span><svg class="icono" style="color:var(--terracota)"><use href="#i-escudo"/></svg> Ubicación aproximada (~1 km, sin dirección)</span>
+    <span><span class="marca" style="position:static;box-shadow:none">1</span> Decisión de diseño anotada</span>
+  </div>
+</header>
+
+<main class="pantallas">
+  <!-- ——— 1. Buscar oficio (CU1) ——— -->
+  <section class="columna" aria-labelledby="t1">
+    <h2 id="t1"><small>01</small> Buscar taller (CU1)</h2>
+    <div class="telefono">
+      <div class="estado-sistema"><span>16:20</span><span>4G ▮▮▮</span></div>
+      <div class="barra">
+        <div class="barra-izq">
+          <button class="boton-icono" aria-label="Volver al inicio"><svg class="icono"><use href="#i-atras"/></svg></button>
+          <h3>Reparar prenda</h3>
+        </div>
+      </div>
+
+      <div class="buscador-caja">
+        <label class="buscador-label" for="input-q">¿Qué arreglo necesitas?</label>
+        <div class="buscador-input-wrap">
+          <svg class="icono icono-buscar" aria-hidden="true"><use href="#i-buscar"/></svg>
+          <input id="input-q" class="buscador-input" type="search" placeholder="Ej: cierre, basta, cambio de suela…">
+        </div>
+      </div>
+
+      <span class="marca" style="top:164px;right:10px">1</span>
+      <p class="chips-titulo">Oficio y prenda (desde el asistente)</p>
+      <div class="chips" role="group" aria-label="Filtrar por oficio o prenda">
+        <button class="chip" aria-pressed="true" data-cat="todos"><svg class="icono" style="width:16px;height:16px"><use href="#i-check"/></svg>Todos</button>
+        <button class="chip" aria-pressed="false" data-cat="costura">Costura</button>
+        <button class="chip" aria-pressed="false" data-cat="zapateria">Zapatería</button>
+        <button class="chip" aria-pressed="false" data-cat="tejido">Tejido</button>
+        <button class="chip" aria-pressed="false" data-cat="uniforme">Uniforme escolar</button>
+      </div>
+
+      <span class="marca" style="top:256px;right:10px">2</span>
+      <div class="selector-estado-demo" role="group" aria-label="Previsualizar estados de la pantalla">
+        <button type="button" aria-pressed="true" data-vista="lista">Con resultados</button>
+        <button type="button" aria-pressed="false" data-vista="vacio">Sin resultados</button>
+        <button type="button" aria-pressed="false" data-vista="error">Error red</button>
+      </div>
+
+      <div class="desplazable">
+        <ul class="lista-oficios" id="vista-lista">
+          <li class="tarjeta-oficio" data-cat="costura uniforme">
+            <div class="cabecera">
+              <div>
+                <h4>Costuras Rosita</h4>
+                <p class="insignia-verificado"><svg class="icono"><use href="#i-verificado"/></svg>Verificado por Hilo Circular</p>
+              </div>
+              <span class="distancia-pill"><svg class="icono" style="width:15px;height:15px"><use href="#i-pin"/></svg>1,4 km</span>
+            </div>
+            <p class="comuna-linea">La Serena · Sector aproximado (~1 km)</p>
+            <ul class="servicios-mini">
+              <li><span>Bastas y ajustes</span><span class="precio">Desde $3.000</span></li>
+              <li><span>Cambio de cierre</span><span class="precio">Desde $5.000</span></li>
+            </ul>
+          </li>
+
+          <li class="tarjeta-oficio" data-cat="zapateria">
+            <div class="cabecera">
+              <div>
+                <h4>Zapatería Don Lucho</h4>
+                <p class="insignia-verificado"><svg class="icono"><use href="#i-verificado"/></svg>Verificado por Hilo Circular</p>
+              </div>
+              <span class="distancia-pill"><svg class="icono" style="width:15px;height:15px"><use href="#i-pin"/></svg>2,9 km</span>
+            </div>
+            <p class="comuna-linea">La Serena · Local a pasos de la Recova</p>
+            <ul class="servicios-mini">
+              <li><span>Suelas y tapillas</span><span class="precio">Desde $6.000</span></li>
+              <li><span>Reparación de bolsos</span><span class="precio">Desde $4.000</span></li>
+            </ul>
+          </li>
+
+          <li class="tarjeta-oficio" data-cat="tejido">
+            <div class="cabecera">
+              <div>
+                <h4>Tejidos La Antena</h4>
+                <p class="insignia-verificado"><svg class="icono"><use href="#i-verificado"/></svg>Verificado por Hilo Circular</p>
+              </div>
+              <span class="distancia-pill"><svg class="icono" style="width:15px;height:15px"><use href="#i-pin"/></svg>3,8 km</span>
+            </div>
+            <p class="comuna-linea">La Serena · Sector aproximado (~1 km)</p>
+            <ul class="servicios-mini">
+              <li><span>Zurcido y puntos corridos</span><span class="precio">A convenir</span></li>
+            </ul>
+          </li>
+        </ul>
+
+        <!-- Estado vacío -->
+        <div class="estado-vacio" id="vista-vacio" hidden>
+          <svg class="icono" style="width:28px;height:28px;color:var(--terracota)"><use href="#i-tijeras"/></svg>
+          <h4>No encontramos talleres a menos de 15 km</h4>
+          <p>Prueba ampliando la distancia de búsqueda a toda la conurbación La Serena–Coquimbo o quitando algún filtro.</p>
+          <button type="button" class="boton boton-primario" style="width:100%;min-height:48px;font-size:16px" id="btn-ampliar">Ampliar radio a 30 km</button>
+          <button type="button" class="boton boton-secundario" style="width:100%;margin-top:8px" id="btn-limpiar">Quitar filtros</button>
+        </div>
+
+        <!-- Estado de error -->
+        <div class="estado-error" id="vista-error" role="alert" hidden>
+          <svg class="icono" style="width:28px;height:28px;color:var(--terracota-tinta)"><use href="#i-alerta"/></svg>
+          <h4>No pudimos cargar los talleres</h4>
+          <p>Revisa tu conexión a internet e inténtalo de nuevo. Tus filtros seleccionados se mantienen guardados.</p>
+          <button type="button" class="boton boton-primario" style="width:100%;min-height:48px;font-size:16px" id="btn-reintentar">Intentar de nuevo</button>
+        </div>
+      </div>
+    </div>
+    <ol class="notas">
+      <li><span><b>Etiqueta visible + chips de 44 px:</b> el buscador nunca depende solo del placeholder y los filtros llegan preaplicados desde el asistente CU0 (<code>?categoria=costura&amp;prenda=uniforme_escolar</code>).</span></li>
+      <li><span><b>Estados vacío y error accionables:</b> si no hay talleres en el radio, se ofrece ampliar a 30 km o limpiar filtros con un toque, evitando callejones sin salida.</span></li>
+      <li><span><b>Precio referencial en la misma tarjeta:</b> mostrar "Desde $3.000" o "A convenir" antes de entrar al perfil transparenta que reparar cuesta mucho menos que comprar ropa nueva.</span></li>
+    </ol>
+  </section>
+
+  <!-- ——— 2. Perfil público de oficio (CU1) ——— -->
+  <section class="columna" aria-labelledby="t2">
+    <h2 id="t2"><small>02</small> Perfil de oficio (CU1)</h2>
+    <div class="telefono">
+      <div class="estado-sistema"><span>16:22</span><span>4G ▮▮▮</span></div>
+      <div class="barra">
+        <div class="barra-izq">
+          <button class="boton-icono" aria-label="Volver a resultados"><svg class="icono"><use href="#i-atras"/></svg></button>
+          <h3>Perfil del taller</h3>
+        </div>
+      </div>
+
+      <div class="desplazable">
+        <div class="portada-oficio">
+          <p class="verificado"><svg class="icono"><use href="#i-verificado"/></svg>Verificado por Hilo Circular</p>
+          <h3>Costuras Rosita</h3>
+          <p class="bio">Más de 30 años haciendo bastas, cambiando cierres y ajustando uniformes en Las Compañías.</p>
+          <div class="meta">
+            <span><svg class="icono" style="width:16px;height:16px"><use href="#i-pin"/></svg>Las Compañías, La Serena · 1,4 km</span>
+          </div>
+        </div>
+
+        <span class="marca" style="top:268px;right:8px">1</span>
+        <div class="bloque">
+          <h4>Servicios y precios referenciales</h4>
+          <div class="servicio-card">
+            <div class="fila">
+              <h5>Bastas y ajustes</h5>
+              <span class="precio">Desde $3.000</span>
+            </div>
+            <div class="etiquetas">
+              <span class="etiqueta">Pantalón</span>
+              <span class="etiqueta">Falda o vestido</span>
+              <span class="etiqueta">Uniforme escolar</span>
+            </div>
+          </div>
+          <div class="servicio-card">
+            <div class="fila">
+              <h5>Cambio de cierre</h5>
+              <span class="precio">Desde $5.000</span>
+            </div>
+            <div class="etiquetas">
+              <span class="etiqueta">Pantalón</span>
+              <span class="etiqueta">Chaqueta o abrigo</span>
+            </div>
+          </div>
+        </div>
+
+        <span class="marca" style="top:492px;right:8px">2</span>
+        <div class="bloque" style="margin-bottom:16px">
+          <h4>Sector aproximado</h4>
+          <div id="mapa-oficio" role="img" aria-label="Mapa mostrando un círculo aproximado de 1 km en Las Compañías, sin dirección exacta"></div>
+          <div class="aviso-privacidad">
+            <svg class="icono"><use href="#i-escudo"/></svg>
+            <span><b>Ubicación aproximada (~1 km).</b> Rosita trabaja desde su casa; por seguridad no publicamos su dirección ni su número. Te dará la dirección cuando hablen.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <span class="marca" style="top:-10px;right:8px">3</span>
+        <button type="button" class="boton boton-whatsapp" id="btn-wa-demo">
+          <svg class="icono"><use href="#i-mensaje"/></svg>Contactar por WhatsApp
+        </button>
+      </div>
+    </div>
+    <ol class="notas">
+      <li><span><b>Precios "Desde" o "A convenir":</b> reducen la incertidumbre de la persona sin obligar al oficio a fijar una tarifa cerrada antes de ver la prenda.</span></li>
+      <li><span><b>Privacidad por defecto (~1 km):</b> la API redondea las coordenadas a 2 decimales y oculta la dirección (<code>direccion: null</code>). En el mapa se dibuja un área de referencia en vez de un pin sobre su casa.</span></li>
+      <li><span><b>Contacto directo por WhatsApp:</b> el botón llama a <code>POST /api/oficios/:id/contacto</code> para sumar al indicador de impacto y abre WhatsApp con el mensaje ya escrito.</span></li>
+    </ol>
+  </section>
+
+  <!-- ——— 3. Crear perfil de oficio (CU3) ——— -->
+  <section class="columna" aria-labelledby="t3">
+    <h2 id="t3"><small>03</small> Crear perfil (CU3)</h2>
+    <div class="telefono">
+      <div class="estado-sistema"><span>16:25</span><span>4G ▮▮▮</span></div>
+      <div class="barra">
+        <div class="barra-izq">
+          <button class="boton-icono" aria-label="Paso anterior" id="btn-paso-ant"><svg class="icono"><use href="#i-atras"/></svg></button>
+          <h3>Publicar mi taller</h3>
+        </div>
+      </div>
+
+      <div class="desplazable">
+        <span class="marca" style="top:84px;right:8px">1</span>
+        <div class="progreso">
+          <p id="texto-paso-cu3">Paso 1 de 3 · Tus datos y contacto</p>
+          <div aria-hidden="true">
+            <i class="lleno" id="barra-1"></i>
+            <i class="lleno" id="barra-2"></i>
+            <i id="barra-3"></i>
+          </div>
+        </div>
+
+        <h3 class="pregunta" id="titulo-paso-cu3">¿Cómo te encuentran tus vecinos?</h3>
+        <p class="ayuda-paso">Solo pedimos lo esencial. Las personas te escribirán directo a tu WhatsApp de siempre.</p>
+
+        <div class="campo-grupo">
+          <label class="campo-label" for="inp-nombre">Nombre de tu taller o tu nombre</label>
+          <span class="campo-pista">Así aparecerás en las búsquedas</span>
+          <input id="inp-nombre" class="campo-input" type="text" value="Costuras Rosita">
+        </div>
+
+        <span class="marca" style="top:338px;right:8px">2</span>
+        <div class="campo-grupo">
+          <label class="campo-label" for="inp-fono">Tu número de WhatsApp</label>
+          <span class="campo-pista">Formato chileno de 8 dígitos después del +56 9</span>
+          <div class="prefijo-fono">
+            <span class="prefijo-caja" aria-hidden="true">+56 9</span>
+            <input id="inp-fono" class="campo-input" type="tel" inputmode="numeric" value="8765 4321" aria-label="Tu número de WhatsApp después del +56 9">
+          </div>
+        </div>
+
+        <span class="marca" style="top:468px;right:8px">3</span>
+        <div class="campo-grupo">
+          <span class="campo-label" id="lbl-priv">¿Dónde atiendes?</span>
+          <span class="campo-pista">Elige cómo cuidar tu privacidad en el mapa</span>
+        </div>
+        <div class="opciones-privacidad" role="radiogroup" aria-labelledby="lbl-priv">
+          <button type="button" class="opcion-radio" role="radio" aria-checked="true" data-priv="aproximada">
+            <span class="circulo-radio" aria-hidden="true"></span>
+            <div>
+              <b>Trabajo desde mi casa (recomendado)</b>
+              <span>Mostramos solo tu barrio (~1 km) y ocultamos tu dirección exacta.</span>
+            </div>
+          </button>
+          <button type="button" class="opcion-radio" role="radio" aria-checked="false" data-priv="exacta">
+            <span class="circulo-radio" aria-hidden="true"></span>
+            <div>
+              <b>Tengo un local abierto al público</b>
+              <span>Mostramos tu dirección comercial y ubicación exacta en el mapa.</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button type="button" class="boton boton-primario" id="btn-guardar-cu3">
+          Guardar y pasar a mis servicios
+        </button>
+      </div>
+    </div>
+    <ol class="notas">
+      <li><span><b>Pensado para adultos mayores y onboarding asistido:</b> letra <i>Atkinson Hyperlegible</i> de 18 px, alto contraste AAA y pasos cortos con etiquetas permanentes fuera del campo.</span></li>
+      <li><span><b>Prefijo <code>+56 9</code> fijo y teclado numérico:</b> evita errores de formato al digitar el celular; la API igualmente normaliza espacios y guiones con Zod.</span></li>
+      <li><span><b>Privacidad explicada en lenguaje cotidiano:</b> en vez de términos técnicos ("precisión de coordenadas"), se pregunta "Trabajo desde mi casa" vs. "Tengo un local", dejando marcada por defecto la opción segura.</span></li>
+    </ol>
+  </section>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // Mapa de ubicación aproximada (círculo de ~1 km en Las Compañías, La Serena)
+  const centroAprox = [-29.88, -71.23];
+  const mapaOficio = L.map("mapa-oficio", { zoomControl: false, attributionControl: true }).setView(centroAprox, 13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  }).addTo(mapaOficio);
+
+  L.circle(centroAprox, {
+    radius: 900,
+    color: "#b4552f",
+    weight: 2,
+    dashArray: "6 4",
+    fillColor: "#e9b79f",
+    fillOpacity: 0.35,
+  }).addTo(mapaOficio).bindPopup("<b>Sector aproximado (~1 km)</b><br>Las Compañías, La Serena");
+
+  // Pantalla 1: Filtros por categoría/prenda
+  const chipsFiltro = document.querySelectorAll('[data-cat]');
+  const tarjetas = document.querySelectorAll('#vista-lista .tarjeta-oficio');
+  const inputQ = document.getElementById('input-q');
+
+  function filtrarTarjetas() {
+    const activo = document.querySelector('.chip[data-cat][aria-pressed="true"]')?.dataset.cat || 'todos';
+    const texto = inputQ.value.trim().toLowerCase();
+    let visibles = 0;
+    tarjetas.forEach((t) => {
+      const coincideCat = activo === 'todos' || t.dataset.cat.includes(activo);
+      const coincideTexto = !texto || t.textContent.toLowerCase().includes(texto);
+      const mostrar = coincideCat && coincideTexto;
+      t.hidden = !mostrar;
+      if (mostrar) visibles++;
+    });
+    document.getElementById('vista-lista').hidden = visibles === 0;
+    document.getElementById('vista-vacio').hidden = visibles > 0;
+    document.getElementById('vista-error').hidden = true;
+  }
+
+  chipsFiltro.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      chipsFiltro.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      filtrarTarjetas();
+    });
+  });
+
+  inputQ.addEventListener('input', filtrarTarjetas);
+
+  // Selector de estados de demostración (Con resultados / Sin resultados / Error)
+  const botonesEstado = document.querySelectorAll('[data-vista]');
+  function cambiarVista(vista) {
+    botonesEstado.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.vista === vista)));
+    document.getElementById('vista-lista').hidden = vista !== 'lista';
+    document.getElementById('vista-vacio').hidden = vista !== 'vacio';
+    document.getElementById('vista-error').hidden = vista !== 'error';
+  }
+  botonesEstado.forEach((b) => b.addEventListener('click', () => cambiarVista(b.dataset.vista)));
+  document.getElementById('btn-ampliar').addEventListener('click', () => {
+    inputQ.value = '';
+    chipsFiltro.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.cat === 'todos')));
+    tarjetas.forEach((t) => (t.hidden = false));
+    cambiarVista('lista');
+  });
+  document.getElementById('btn-limpiar').addEventListener('click', () => document.getElementById('btn-ampliar').click());
+  document.getElementById('btn-reintentar').addEventListener('click', () => cambiarVista('lista'));
+
+  // Pantalla 3: Selector de privacidad (radiogroup accesible)
+  const radiosPriv = document.querySelectorAll('.opcion-radio');
+  radiosPriv.forEach((radio) => {
+    radio.addEventListener('click', () => {
+      radiosPriv.forEach((r) => r.setAttribute('aria-checked', String(r === radio)));
+    });
+  });
+</script>
+</body>
+</html>

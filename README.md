@@ -24,6 +24,7 @@ En 2021 llegaron a Chile cerca de 156 mil toneladas de ropa usada y alrededor de
 | [05 · API](docs/05-api.md) | Endpoints, parámetros y errores |
 | [06 · Sistema de diseño](docs/06-sistema-de-diseno.md) | Paleta con contraste verificado, tipografía, reglas de accesibilidad |
 | [07 · Planificación](docs/07-planificacion.md) | Plan semanal, estado real y replanificación |
+| [Mockup CU1 y CU3 · Oficios](docs/mockups/oficios.html) | Mockup interactivo de búsqueda, perfil y creación de oficio |
 | [Mockup CU2 · Donar](docs/mockups/donar.html) | Mockup interactivo de alta fidelidad (se abre en el navegador) |
 | [Entregas](docs/entregas/) | Presentaciones y documentos entregados en cada hito |
 
