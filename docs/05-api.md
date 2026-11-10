@@ -4,7 +4,7 @@ Base: `http://localhost:3000/api` en desarrollo. Todas las respuestas son JSON.
 
 - **Respuesta exitosa:** `{ "datos": … }`
 - **Error:** `{ "error": { "codigo": "…", "mensaje": "…", "detalles": … } }`. El `mensaje` está escrito para mostrarse directamente a la persona usuaria.
-- **Autenticación:** encabezado `Authorization: Bearer <token>`. Los endpoints de registro e inicio de sesión los implementa el issue de autenticación (Hector) y usan `firmarToken` de `apps/api/src/middleware/auth.ts`.
+- **Autenticación:** encabezado `Authorization: Bearer <token>`. El token se obtiene en `POST /auth/registro` o `POST /auth/ingreso` y dura 7 días.
 
 ## Endpoints públicos
 
@@ -18,7 +18,13 @@ Base: `http://localhost:3000/api` en desarrollo. Todas las respuestas son JSON.
 | POST | `/oficios/:id/contacto` | `{ canal: "whatsapp" \| "telefono" }`. Registra el contacto y devuelve `{ url }` (`https://wa.me/…` o `tel:…`). La sesión es opcional |
 | GET | `/fundaciones` | Puntos de donación (ver parámetros abajo) |
 | GET | `/fundaciones/:id` | Detalle de una fundación |
-| GET | `/impacto` | Indicadores de impacto |
+| GET | `/impacto` | Indicadores de impacto, incluidos `publicacionesActivas` y `prendasRecirculadas` del mercado |
+| POST | `/auth/registro` | `{ nombre, email, clave, rol? }` (`rol`: `persona` u `oficio`; por defecto `persona`). Devuelve `{ token, usuario }` |
+| POST | `/auth/ingreso` | `{ email, clave }`. Devuelve `{ token, usuario }`. Ante cualquier error responde `401 credenciales_invalidas` con el mismo mensaje |
+| GET | `/mercado` | Prendas publicadas, sin las vendidas (ver parámetros abajo) |
+| GET | `/mercado/:id` | Detalle con fotos, vendedor y `canales`. Nunca expone el WhatsApp de otra persona |
+| GET | `/mercado/fotos/:id` | La imagen en sí (cache inmutable de un año) |
+| POST | `/mercado/:id/contacto` | Devuelve `{ url }` de WhatsApp con un mensaje ya escrito, o `422 sin_whatsapp` |
 
 ### Parámetros de `GET /oficios`
 
@@ -40,6 +46,17 @@ Base: `http://localhost:3000/api` en desarrollo. Todas las respuestas son JSON.
 | `prenda` | Incluye las fundaciones que aceptan esa prenda o que aceptan cualquier prenda |
 | `aceptaDanada=true\|false` | Puntos que reciben, o no, textiles dañados para reciclaje |
 | `abiertoAhora=true\|false` | Según los horarios, evaluados en la hora de Chile continental |
+
+### Parámetros de `GET /mercado`
+
+| Parámetro | Descripción |
+|---|---|
+| `prenda`, `comuna`, `condicion` | Filtros exactos |
+| `q` | Texto de 2 a 60 caracteres; busca en título y descripción |
+| `precioMax` | Precio máximo en pesos |
+| `soloRegalo` | `true` para ver solo lo que se regala (precio 0) |
+| `orden` | `recientes` (por defecto), `precio_asc` o `precio_desc` |
+| `limite` | 1–60, por defecto 24 |
 
 ### Ejemplo
 
@@ -83,6 +100,18 @@ GET /api/oficios?lat=-29.9027&lng=-71.252&categoria=costura
 | GET | `/donaciones/mias` | cualquiera | Una persona ve las donaciones que hizo; una fundación, las que recibe |
 | PATCH | `/donaciones/:id/recepcion` | fundacion | Confirma la recepción. Solo entonces la donación cuenta como impacto |
 | PATCH | `/donaciones/:id/cancelacion` | persona, oficio | Quien donó cancela una donación aún no recibida |
+| GET | `/auth/yo` | cualquiera | Datos de la cuenta |
+| POST | `/mercado` | cualquiera | Publica una prenda. Acepta hasta 4 `fotos: [{ mime, datos }]` en base64 (JPEG, PNG o WebP, máx. 700 KB cada una; se revisa la firma del archivo). El cuerpo admite hasta 4 MB |
+| GET | `/mercado/mias` | cualquiera | Publicaciones propias, incluidas las vendidas, con cuántas conversaciones tiene cada una |
+| PATCH | `/mercado/:id` | dueño | Edición parcial, incluido `estado`: `disponible`, `reservada` o `vendida` |
+| DELETE | `/mercado/:id` | dueño | Elimina la publicación, sus fotos y sus conversaciones |
+| POST | `/mercado/:id/conversacion` | cualquiera salvo el dueño | Abre (o retoma) el chat con quien publicó. `{ texto? }` envía el primer mensaje. Devuelve `{ id }` |
+| GET | `/conversaciones` | participante | Bandeja: prenda, la otra persona, último mensaje y `noLeidos` |
+| GET | `/conversaciones/no-leidos` | cualquiera | `{ total }` para el globo del menú |
+| GET | `/conversaciones/:id` | participante | Conversación con todos sus mensajes (`mio: true/false`). Marca como leídos los de la otra persona |
+| POST | `/conversaciones/:id/mensajes` | participante | `{ texto }` (1 a 1000 caracteres) |
+
+El chat no usa WebSockets: el frontend consulta la conversación abierta cada 4 segundos y la bandeja cada 12. Para una compraventa entre vecinos alcanza, y funciona igual en cualquier hosting.
 
 ### Reglas de `POST /donaciones`
 
@@ -105,5 +134,8 @@ GET /api/oficios?lat=-29.9027&lng=-71.252&categoria=costura
 | 401 | `sin_sesion` / `token_invalido` | Falta el token, o expiró o fue adulterado |
 | 403 | `prohibido` | Rol incorrecto o recurso ajeno |
 | 404 | `no_encontrado` / `ruta_no_encontrada` | — |
-| 409 | `conflicto` | Perfil duplicado o donación ya procesada |
-| 422 | `canal_no_disponible`, `prenda_no_aceptada`, `fundacion_no_acepta_danada` | Reglas de negocio |
+| 400 | `foto_invalida` / `publicacion_propia` | El archivo no es la imagen que dice ser / chat con la publicación propia |
+| 401 | `credenciales_invalidas` | Correo o contraseña incorrectos |
+| 409 | `conflicto` | Perfil o correo duplicado, donación ya procesada o prenda ya vendida |
+| 413 | `foto_muy_grande` | Una foto supera los 700 KB |
+| 422 | `canal_no_disponible`, `prenda_no_aceptada`, `fundacion_no_acepta_danada`, `sin_whatsapp` | Reglas de negocio |

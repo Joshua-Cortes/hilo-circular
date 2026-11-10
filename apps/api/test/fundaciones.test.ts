@@ -32,8 +32,8 @@ describe("GET /api/fundaciones", () => {
 
   it("filtra puntos que reciben textiles dañados", async () => {
     const res = await entorno.api().get("/api/fundaciones").query({ aceptaDanada: "true" });
-    expect(res.body.datos).toHaveLength(1);
-    expect(res.body.datos[0].aceptaDanada).toBe(true);
+    expect(res.body.datos.length).toBeGreaterThan(0);
+    expect(res.body.datos.every((f: { aceptaDanada: boolean }) => f.aceptaDanada)).toBe(true);
   });
 
   it("rechaza valores booleanos ambiguos", async () => {

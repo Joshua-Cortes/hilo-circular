@@ -1,6 +1,7 @@
 import { AlertCircle, LocateFixed, RotateCcw, Scissors, Search, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
+import { EncabezadoPagina } from "../componentes/EncabezadoPagina";
 import { TarjetaOficio } from "../componentes/TarjetaOficio";
 import { ChipFiltro } from "../componentes/ui/ChipFiltro";
 import { api, type Catalogo, type OficioPublico } from "../lib/api";
@@ -152,29 +153,27 @@ export function Reparar() {
   const hayFiltrosActivos = Boolean(categoriaActiva || prendaActiva || comunaActiva || qDebounced.length >= 2);
 
   return (
-    <section className="mx-auto max-w-6xl px-5 py-12 md:py-16" aria-labelledby="titulo-reparar">
-      <div className="max-w-3xl">
-        <p className="font-bold tracking-widest text-terracota-tinta uppercase">CU1 · Talleres de reparación</p>
-        <h1 id="titulo-reparar" className="mt-2 text-4xl font-semibold md:text-5xl">
-          Encuentra quién arregle tu prenda cerca de ti
-        </h1>
-        <div className="puntada mt-5 w-28 text-terracota" aria-hidden="true" />
-        <p className="mt-5 text-xl text-tinta-suave">
-          Costureras, zapateros, tejedoras y tapiceros de La Serena y Coquimbo. Los contactas directo por WhatsApp o
-          teléfono, sin intermediarios ni comisiones.
-        </p>
-      </div>
+    <section className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14" aria-labelledby="titulo-reparar">
+      <EncabezadoPagina
+        id="titulo-reparar"
+        etiqueta="01 · Reparar"
+        titulo={
+          <>
+            Alguien de tu barrio <em className="acento">la arregla</em>
+          </>
+        }
+      >
+        Costureras, zapateros, tejedoras y tapiceros de La Serena y Coquimbo. Les escribes directo por WhatsApp, sin
+        intermediarios ni comisiones.
+      </EncabezadoPagina>
 
-      {/* Panel de búsqueda y ubicación */}
-      <div className="tarjeta mt-8 p-6 md:p-8">
-        <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
+      <div className="mt-10 grid items-start gap-3 lg:grid-cols-[22rem_1fr]">
+        {/* Panel de filtros */}
+        <aside aria-label="Filtros" className="bento grid gap-6 bg-superficie lg:sticky lg:top-24">
           <div>
-            <label htmlFor="buscar-oficio" className="block text-base font-bold text-bosque">
-              ¿Qué arreglo o taller buscas?
+            <label htmlFor="buscar-oficio" className="font-bold">
+              ¿Qué necesitas arreglar?
             </label>
-            <p id="ayuda-buscar" className="mt-0.5 text-sm text-tinta-suave">
-              Escribe al menos 2 letras, por ejemplo: cierre, basta, suela, uniforme o el nombre del taller.
-            </p>
             <div className="relative mt-2 flex items-center">
               <Search className="pointer-events-none absolute left-4 size-5 text-tinta-suave" aria-hidden="true" />
               <input
@@ -183,220 +182,194 @@ export function Reparar() {
                 value={textoBusqueda}
                 onChange={(e) => setTextoBusqueda(e.target.value)}
                 aria-describedby="ayuda-buscar"
-                placeholder="Ej: cambio de cierre, basta, suelas…"
-                className="min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-crema pr-12 pl-12 text-base font-bold text-bosque placeholder:font-normal placeholder:text-tinta-suave"
+                placeholder="Cierre, basta, suela…"
+                className="campo pr-12 pl-12"
               />
               {textoBusqueda && (
                 <button
                   type="button"
                   onClick={() => setTextoBusqueda("")}
                   aria-label="Borrar texto de búsqueda"
-                  className="absolute right-2 flex size-10 cursor-pointer items-center justify-center rounded-full text-tinta-suave hover:bg-salvia-claro hover:text-bosque"
+                  className="absolute right-1.5 flex size-10 cursor-pointer items-center justify-center rounded-full text-tinta-suave hover:bg-menta-clara hover:text-tinta"
                 >
                   <X className="size-5" aria-hidden="true" />
                 </button>
               )}
             </div>
+            <p id="ayuda-buscar" className="mt-1.5 text-sm text-tinta-suave">
+              También sirve el nombre del taller.
+            </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={solicitarUbicacion}
-              disabled={estadoGps === "solicitando"}
-              aria-pressed={estadoGps === "activo"}
-              className={`boton ${
-                estadoGps === "activo"
-                  ? "bg-bosque text-crema"
-                  : "border-2 border-bosque bg-papel text-bosque hover:bg-salvia-claro"
-              }`}
-            >
-              <LocateFixed className="size-5 shrink-0" aria-hidden="true" />
-              <span>
-                {estadoGps === "solicitando"
-                  ? "Obteniendo ubicación…"
-                  : estadoGps === "activo"
-                    ? "Ordenado por tu ubicación"
-                    : "Ordenar por mi cercanía"}
-              </span>
-            </button>
-          </div>
-        </div>
+          <button
+            type="button"
+            onClick={solicitarUbicacion}
+            disabled={estadoGps === "solicitando"}
+            aria-pressed={estadoGps === "activo"}
+            className={
+              estadoGps === "activo" ? "boton bg-tinta text-fondo" : "boton bg-menta text-tinta hover:bg-menta/70"
+            }
+          >
+            <LocateFixed className="size-5 shrink-0" aria-hidden="true" />
+            {estadoGps === "solicitando"
+              ? "Obteniendo ubicación…"
+              : estadoGps === "activo"
+                ? "Ordenado por tu ubicación"
+                : "Ordenar por cercanía"}
+          </button>
+          {estadoGps === "denegado" && (
+            <p className="-mt-3 rounded-2xl bg-kraft-clara px-4 py-3 text-sm text-kraft-tinta">
+              No pudimos acceder a tu ubicación. Elige tu comuna para ver los talleres de tu zona.
+            </p>
+          )}
 
-        {estadoGps === "denegado" && (
-          <p className="mt-4 rounded-xl bg-salvia-claro px-4 py-3 text-sm text-bosque">
-            No pudimos acceder a tu ubicación. Puedes elegir tu comuna abajo para ordenar los talleres de tu zona.
-          </p>
-        )}
-
-        {/* Filtro por comuna y radio */}
-        <div className="mt-6 border-t border-borde pt-5">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <fieldset className="border-0 p-0">
-              <legend className="block text-sm font-bold tracking-wider text-tinta-suave uppercase">Comuna</legend>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <ChipFiltro activo={comunaActiva === ""} onClick={() => actualizarParametro("comuna", "")}>
-                  Todas
+          <fieldset>
+            <legend className="etiqueta text-tinta-suave">Comuna</legend>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              <ChipFiltro activo={comunaActiva === ""} onClick={() => actualizarParametro("comuna", "")}>
+                Todas
+              </ChipFiltro>
+              {Object.keys(CENTROS_COMUNA).map((comuna) => (
+                <ChipFiltro
+                  key={comuna}
+                  activo={comunaActiva === comuna}
+                  onClick={() => actualizarParametro("comuna", comunaActiva === comuna ? "" : comuna)}
+                >
+                  {comuna}
                 </ChipFiltro>
-                {(catalogo?.comunas ?? ["La Serena", "Coquimbo"]).map((comuna) => (
-                  <ChipFiltro
-                    key={comuna}
-                    activo={comunaActiva === comuna}
-                    onClick={() => actualizarParametro("comuna", comunaActiva === comuna ? "" : comuna)}
-                  >
-                    {comuna}
+              ))}
+            </div>
+          </fieldset>
+
+          {coordenadasEfectivas && (
+            <fieldset>
+              <legend className="etiqueta text-tinta-suave">Distancia máxima</legend>
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                {RADIOS_DISPONIBLES.map((r) => (
+                  <ChipFiltro key={r} activo={radioKm === r} onClick={() => actualizarParametro("radioKm", String(r))}>
+                    {r} km
                   </ChipFiltro>
                 ))}
               </div>
             </fieldset>
+          )}
 
-            {coordenadasEfectivas && (
-              <fieldset className="border-0 p-0">
-                <legend className="block text-sm font-bold tracking-wider text-tinta-suave uppercase">
-                  Distancia máxima
-                </legend>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {RADIOS_DISPONIBLES.map((r) => (
-                    <ChipFiltro
-                      key={r}
-                      activo={radioKm === r}
-                      onClick={() => actualizarParametro("radioKm", String(r))}
-                    >
-                      Hasta {r} km
-                    </ChipFiltro>
-                  ))}
-                </div>
-              </fieldset>
-            )}
-          </div>
-        </div>
-
-        {/* Filtro por categoría de oficio */}
-        <fieldset className="mt-5 border-t border-borde p-0 pt-5">
-          <legend className="block text-sm font-bold tracking-wider text-tinta-suave uppercase">Tipo de oficio</legend>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <ChipFiltro activo={categoriaActiva === ""} onClick={() => actualizarParametro("categoria", "")}>
-              Todos los oficios
-            </ChipFiltro>
-            {catalogo?.categorias.map((cat) => (
-              <ChipFiltro
-                key={cat.id}
-                activo={categoriaActiva === cat.id}
-                onClick={() => actualizarParametro("categoria", categoriaActiva === cat.id ? "" : cat.id)}
-              >
-                {cat.etiqueta}
+          <fieldset>
+            <legend className="etiqueta text-tinta-suave">Oficio</legend>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              <ChipFiltro activo={categoriaActiva === ""} onClick={() => actualizarParametro("categoria", "")}>
+                Todos
               </ChipFiltro>
-            ))}
-          </div>
-        </fieldset>
-
-        {/* Filtro por tipo de prenda */}
-        <fieldset className="mt-5 border-t border-borde p-0 pt-5">
-          <legend className="block text-sm font-bold tracking-wider text-tinta-suave uppercase">
-            Prenda que quieres arreglar
-          </legend>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <ChipFiltro activo={prendaActiva === ""} onClick={() => actualizarParametro("prenda", "")}>
-              Cualquier prenda
-            </ChipFiltro>
-            {catalogo?.prendas.map((prenda) => (
-              <ChipFiltro
-                key={prenda.id}
-                activo={prendaActiva === prenda.id}
-                onClick={() => actualizarParametro("prenda", prendaActiva === prenda.id ? "" : prenda.id)}
-              >
-                {prenda.etiqueta}
-              </ChipFiltro>
-            ))}
-          </div>
-        </fieldset>
-
-        {hayFiltrosActivos && (
-          <div className="mt-5 flex justify-end border-t border-borde pt-4">
-            <button type="button" onClick={limpiarFiltros} className="boton-secundario px-5">
-              <RotateCcw className="size-4 shrink-0" aria-hidden="true" />
-              <span>Quitar filtros</span>
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Resultados (espacio reservado para evitar saltos de diseño) */}
-      <div className="mt-8 min-h-[320px]" aria-live="polite">
-        {cargando && (
-          <div>
-            <p className="text-base font-bold text-tinta-suave">Buscando talleres disponibles…</p>
-            <div className="mt-4 grid gap-6 md:grid-cols-2" aria-hidden="true">
-              {[1, 2, 3, 4].map((n) => (
-                <div key={n} className="tarjeta h-72 animate-pulse p-6">
-                  <div className="h-7 w-1/2 rounded-lg bg-borde" />
-                  <div className="mt-3 h-4 w-1/3 rounded bg-borde" />
-                  <div className="mt-4 h-16 w-full rounded-xl bg-borde/70" />
-                  <div className="mt-6 h-12 w-48 rounded-full bg-borde" />
-                </div>
+              {catalogo?.categorias.map((cat) => (
+                <ChipFiltro
+                  key={cat.id}
+                  activo={categoriaActiva === cat.id}
+                  onClick={() => actualizarParametro("categoria", categoriaActiva === cat.id ? "" : cat.id)}
+                >
+                  {cat.etiqueta}
+                </ChipFiltro>
               ))}
             </div>
-          </div>
-        )}
+          </fieldset>
 
-        {!cargando && error && (
-          <div role="alert" className="tarjeta border-2 border-terracota-tinta bg-terracota-claro/25 p-8">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-1 size-7 shrink-0 text-terracota-tinta" aria-hidden="true" />
-              <div>
-                <h2 className="text-2xl font-semibold">No pudimos cargar los talleres</h2>
-                <p className="mt-2 text-lg text-tinta-suave">{error}</p>
-                <button type="button" onClick={cargarOficios} className="boton-primario mt-5">
-                  Intentar de nuevo
-                </button>
+          <div>
+            <label htmlFor="filtro-prenda" className="etiqueta text-tinta-suave">
+              Prenda
+            </label>
+            <select
+              id="filtro-prenda"
+              value={prendaActiva}
+              onChange={(e) => actualizarParametro("prenda", e.target.value)}
+              className="campo mt-2.5 cursor-pointer font-bold"
+            >
+              <option value="">Cualquier prenda</option>
+              {catalogo?.prendas.map((prenda) => (
+                <option key={prenda.id} value={prenda.id}>
+                  {prenda.etiqueta}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {hayFiltrosActivos && (
+            <button type="button" onClick={limpiarFiltros} className="boton-secundario">
+              <RotateCcw className="size-4 shrink-0" aria-hidden="true" />
+              Quitar filtros
+            </button>
+          )}
+        </aside>
+
+        {/* Resultados (altura mínima reservada para evitar saltos de diseño) */}
+        <div className="min-h-[320px]" aria-live="polite">
+          {cargando && (
+            <div>
+              <p className="sr-only">Buscando talleres disponibles…</p>
+              <div className="grid gap-3 xl:grid-cols-2" aria-hidden="true">
+                {[1, 2, 3, 4].map((n) => (
+                  <div key={n} className="bento h-80 animate-pulse bg-superficie">
+                    <div className="h-8 w-1/2 rounded-full bg-menta-clara" />
+                    <div className="mt-4 h-4 w-1/3 rounded-full bg-menta-clara" />
+                    <div className="mt-6 h-24 w-full rounded-2xl bg-menta-clara" />
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {!cargando && !error && oficiosMostrados.length === 0 && (
-          <div className="tarjeta border-2 border-dashed border-borde-fuerte p-8 md:p-10">
-            <Scissors className="size-10 text-terracota" aria-hidden="true" />
-            <h2 className="mt-4 text-3xl font-semibold">No encontramos talleres con esos filtros</h2>
-            <p className="mt-2 max-w-xl text-lg text-tinta-suave">
-              {coordenadasEfectivas && radioKm < 50
-                ? `No hay oficios registrados a menos de ${radioKm} km que coincidan con tu búsqueda. Prueba ampliando la distancia o quitando algún filtro.`
-                : "Prueba quitando alguno de los filtros seleccionados o buscando con otras palabras."}
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {coordenadasEfectivas && radioKm < 50 && (
-                <button type="button" onClick={ampliarRadio} className="boton-primario">
-                  Ampliar radio a {radioKm < 30 ? 30 : 50} km
-                </button>
-              )}
-              {hayFiltrosActivos && (
-                <button type="button" onClick={limpiarFiltros} className="boton-secundario">
-                  Ver todos los talleres
-                </button>
-              )}
+          {!cargando && error && (
+            <div role="alert" className="bento bg-alerta-clara">
+              <AlertCircle className="size-8 text-alerta" aria-hidden="true" />
+              <h2 className="mt-4 text-3xl">No pudimos cargar los talleres</h2>
+              <p className="mt-2 text-lg text-tinta-800">{error}</p>
+              <button type="button" onClick={cargarOficios} className="boton-primario mt-6">
+                Intentar de nuevo
+              </button>
             </div>
-          </div>
-        )}
+          )}
 
-        {!cargando && !error && oficiosMostrados.length > 0 && (
-          <div>
-            <p className="text-base font-bold text-tinta-suave">
-              Mostrando {oficiosMostrados.length}{" "}
-              {oficiosMostrados.length === 1 ? "taller disponible" : "talleres disponibles"}
-              {comunaActiva ? ` en ${comunaActiva}` : ""}
-            </p>
-            <div className="mt-4 grid gap-6 md:grid-cols-2">
-              {oficiosMostrados.map((oficio) => (
-                <TarjetaOficio
-                  key={oficio.id}
-                  oficio={oficio}
-                  etiquetasPrenda={etiquetasPrenda}
-                  etiquetasCategoria={etiquetasCategoria}
-                />
-              ))}
+          {!cargando && !error && oficiosMostrados.length === 0 && (
+            <div className="bento bg-kraft-clara">
+              <Scissors className="size-10 text-kraft-tinta" aria-hidden="true" />
+              <h2 className="mt-4 text-3xl">No encontramos talleres con esos filtros</h2>
+              <p className="mt-2 max-w-xl text-lg text-tinta-800">
+                {coordenadasEfectivas && radioKm < 50
+                  ? `No hay oficios a menos de ${radioKm} km que coincidan. Prueba ampliando la distancia o quitando un filtro.`
+                  : "Prueba quitando alguno de los filtros o buscando con otras palabras."}
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                {coordenadasEfectivas && radioKm < 50 && (
+                  <button type="button" onClick={ampliarRadio} className="boton-primario">
+                    Ampliar a {radioKm < 30 ? 30 : 50} km
+                  </button>
+                )}
+                {hayFiltrosActivos && (
+                  <button type="button" onClick={limpiarFiltros} className="boton-secundario">
+                    Ver todos los talleres
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {!cargando && !error && oficiosMostrados.length > 0 && (
+            <div>
+              <p className="mb-3 px-1 font-bold text-tinta-suave">
+                {oficiosMostrados.length} {oficiosMostrados.length === 1 ? "taller" : "talleres"}
+                {comunaActiva ? ` en ${comunaActiva}` : " en La Serena y Coquimbo"}
+              </p>
+              <div className="grid gap-3 xl:grid-cols-2">
+                {oficiosMostrados.map((oficio) => (
+                  <TarjetaOficio
+                    key={oficio.id}
+                    oficio={oficio}
+                    etiquetasPrenda={etiquetasPrenda}
+                    etiquetasCategoria={etiquetasCategoria}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

@@ -17,16 +17,16 @@ export function ChipFiltro({ activo, className, children, ...resto }: PropsChipF
       type="button"
       aria-pressed={activo}
       className={cn(
-        "inline-flex min-h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full border-2 px-4 text-base font-bold transition-colors duration-200 ease-hilo",
+        "inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded-full border-2 px-4 text-base font-bold transition-colors duration-200 ease-hilo",
         activo
-          ? "border-bosque bg-bosque text-crema"
-          : "border-borde-fuerte bg-papel text-bosque hover:bg-salvia-claro",
+          ? "border-tinta bg-tinta text-fondo"
+          : "border-borde bg-superficie text-tinta hover:border-hoja hover:bg-menta-clara",
         className,
       )}
       {...resto}
     >
       {activo && <Check className="size-4 shrink-0" aria-hidden="true" />}
-      <span>{children}</span>
+      <span className="inline-flex items-center gap-1.5">{children}</span>
     </button>
   );
 }

@@ -2,8 +2,10 @@ import { Router } from "express";
 import {
   CATEGORIAS_SERVICIO,
   COMUNAS,
+  CONDICIONES_PRENDA,
   ESTADOS_PRENDA,
   ETIQUETAS_CATEGORIA,
+  ETIQUETAS_CONDICION,
   ETIQUETAS_ESTADO,
   ETIQUETAS_PRENDA,
   PESO_PROMEDIO_KG,
@@ -21,6 +23,7 @@ export function rutasCatalogo() {
         prendas: TIPOS_PRENDA.map((id) => ({ id, etiqueta: ETIQUETAS_PRENDA[id], pesoKg: PESO_PROMEDIO_KG[id] })),
         estados: ESTADOS_PRENDA.map((id) => ({ id, etiqueta: ETIQUETAS_ESTADO[id] })),
         comunas: COMUNAS,
+        condiciones: CONDICIONES_PRENDA.map((id) => ({ id, etiqueta: ETIQUETAS_CONDICION[id] })),
       },
     });
   });

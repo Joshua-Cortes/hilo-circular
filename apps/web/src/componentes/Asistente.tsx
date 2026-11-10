@@ -33,9 +33,12 @@ export function Asistente() {
   }, []);
 
   // Al cambiar de paso, el foco va al título para que los lectores de pantalla anuncien la nueva pregunta.
+  // No al montar: en el inicio eso hacía saltar la página hasta el asistente.
+  const montado = useRef(false);
   // biome-ignore lint/correctness/useExhaustiveDependencies: el efecto debe correr justamente cuando cambia el paso
   useEffect(() => {
-    titulo.current?.focus();
+    if (montado.current) titulo.current?.focus();
+    montado.current = true;
   }, [paso]);
 
   async function elegirEstado(estado: string) {
@@ -58,29 +61,26 @@ export function Asistente() {
   const numeroPaso = paso === "prenda" ? 1 : paso === "estado" ? 2 : 3;
 
   return (
-    <section
-      aria-labelledby="titulo-asistente"
-      className="tarjeta relative p-6 shadow-[0_1px_0_var(--color-borde)] md:p-8"
-    >
-      <p className="text-sm font-bold tracking-widest text-terracota-tinta uppercase">Paso {numeroPaso} de 3</p>
+    <section aria-labelledby="titulo-asistente" className="bento bg-superficie">
+      <p className="etiqueta text-hoja-oscura">Paso {numeroPaso} de 3</p>
       <div className="mt-2 flex gap-1.5" aria-hidden="true">
         {[1, 2, 3].map((n) => (
           <span
             key={n}
-            className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${n <= numeroPaso ? "bg-terracota" : "bg-borde"}`}
+            className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${n <= numeroPaso ? "bg-hoja" : "bg-borde"}`}
           />
         ))}
       </div>
 
       {error && (
-        <p role="alert" className="mt-6 rounded-xl border border-terracota-tinta bg-terracota-claro/30 p-4">
+        <p role="alert" className="mt-6 rounded-xl border border-alerta bg-alerta-clara p-4">
           {error}
         </p>
       )}
 
       {paso === "prenda" && (
         <div>
-          <h2 id="titulo-asistente" ref={titulo} tabIndex={-1} className="mt-5 text-3xl font-semibold outline-none">
+          <h2 id="titulo-asistente" ref={titulo} tabIndex={-1} className="mt-5 text-3xl outline-none">
             ¿Qué prenda tienes en la mano?
           </h2>
           {!catalogo && !error && <p className="mt-6 text-tinta-suave">Cargando opciones…</p>}
@@ -93,10 +93,10 @@ export function Asistente() {
                     setPrenda(opcion.id);
                     setPaso("estado");
                   }}
-                  className="flex min-h-14 w-full cursor-pointer items-center justify-between rounded-xl border-2 border-borde bg-crema px-4 text-left font-bold transition-colors duration-200 hover:border-bosque"
+                  className="flex min-h-14 w-full cursor-pointer items-center justify-between rounded-2xl border-2 border-borde bg-fondo px-4 text-left font-bold transition-colors duration-200 hover:border-hoja hover:bg-menta-clara"
                 >
                   {opcion.etiqueta}
-                  <ArrowRight className="size-5 text-terracota" aria-hidden="true" />
+                  <ArrowRight className="size-5 text-hoja" aria-hidden="true" />
                 </button>
               </li>
             ))}
@@ -106,7 +106,7 @@ export function Asistente() {
 
       {paso === "estado" && (
         <div>
-          <h2 id="titulo-asistente" ref={titulo} tabIndex={-1} className="mt-5 text-3xl font-semibold outline-none">
+          <h2 id="titulo-asistente" ref={titulo} tabIndex={-1} className="mt-5 text-3xl outline-none">
             ¿Cómo está tu {etiquetaPrenda?.toLowerCase()}?
           </h2>
           <ul className="mt-6 grid gap-3">
@@ -115,15 +115,15 @@ export function Asistente() {
                 <button
                   type="button"
                   onClick={() => elegirEstado(opcion.id)}
-                  className="flex min-h-16 w-full cursor-pointer items-center justify-between rounded-xl border-2 border-borde bg-crema px-5 text-left text-lg font-bold transition-colors duration-200 hover:border-bosque"
+                  className="flex min-h-16 w-full cursor-pointer items-center justify-between rounded-2xl border-2 border-borde bg-fondo px-5 text-left text-lg font-bold transition-colors duration-200 hover:border-hoja hover:bg-menta-clara"
                 >
                   {opcion.etiqueta}
-                  <ArrowRight className="size-5 shrink-0 text-terracota" aria-hidden="true" />
+                  <ArrowRight className="size-5 shrink-0 text-hoja" aria-hidden="true" />
                 </button>
               </li>
             ))}
           </ul>
-          <button type="button" onClick={reiniciar} className="boton mt-4 -ml-4 text-tinta-suave hover:text-bosque">
+          <button type="button" onClick={reiniciar} className="boton mt-4 -ml-4 text-tinta-suave hover:text-tinta">
             <ArrowLeft className="size-5" aria-hidden="true" /> Cambiar prenda
           </button>
         </div>
@@ -149,10 +149,10 @@ function Resultado({
   const destino = `${DESTINO_ACCION[resultado.accion]}?${new URLSearchParams(resultado.filtros)}`;
   return (
     <div aria-live="polite">
-      <div className="mt-6 flex size-14 items-center justify-center rounded-full bg-salvia-claro text-salvia">
+      <div className="mt-6 flex size-14 items-center justify-center rounded-full bg-menta-clara text-hoja-oscura">
         <Icono className="size-7" aria-hidden="true" />
       </div>
-      <h2 id="titulo-asistente" ref={tituloRef} tabIndex={-1} className="mt-4 text-3xl font-semibold outline-none">
+      <h2 id="titulo-asistente" ref={tituloRef} tabIndex={-1} className="mt-4 text-3xl outline-none">
         {resultado.titulo}
       </h2>
       <p className="mt-3 max-w-prose text-lg text-tinta-suave">{resultado.explicacion}</p>
@@ -160,6 +160,11 @@ function Resultado({
         <Link to={destino} className="boton-primario">
           {BOTON_ACCION[resultado.accion]} <ArrowRight className="size-5" aria-hidden="true" />
         </Link>
+        {resultado.accion === "donar" && (
+          <Link to="/mercado/publicar" className="boton-secundario">
+            O véndela en el Mercado
+          </Link>
+        )}
         <button type="button" onClick={alReiniciar} className="boton-secundario">
           Consultar otra prenda
         </button>

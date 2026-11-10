@@ -2,10 +2,11 @@ import { count, eq, sql } from "drizzle-orm";
 import { Router } from "express";
 import type { Db } from "../../db/client.js";
 import { contactos, donaciones, fundaciones, oficios } from "../../db/schema.js";
+import { cifras as cifrasMercado } from "../mercado/servicio.js";
 
 /** Indicadores públicos de impacto (los mismos que se reportan en los hitos del proyecto). */
 export async function calcularImpacto(db: Db) {
-  const [[oficiosActivos], [puntosDonacion], [contactosReparacion], porEstado] = await Promise.all([
+  const [[oficiosActivos], [puntosDonacion], [contactosReparacion], porEstado, mercado] = await Promise.all([
     db.select({ n: count() }).from(oficios).where(eq(oficios.activo, true)),
     db.select({ n: count() }).from(fundaciones).where(eq(fundaciones.activo, true)),
     db.select({ n: count() }).from(contactos),
@@ -18,6 +19,7 @@ export async function calcularImpacto(db: Db) {
       })
       .from(donaciones)
       .groupBy(donaciones.estado),
+    cifrasMercado(db),
   ]);
 
   const estado = (nombre: "registrada" | "recibida") =>
@@ -34,6 +36,7 @@ export async function calcularImpacto(db: Db) {
     prendasDonadas: recibidas.prendas,
     /** Solo cuenta donaciones confirmadas por la fundación. */
     kgTextilRecuperados: Math.round(recibidas.kg * 10) / 10,
+    ...mercado,
   };
 }
 
