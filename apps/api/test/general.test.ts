@@ -43,6 +43,8 @@ describe("API general", () => {
       donacionesPendientes: 0,
       prendasDonadas: 0,
       kgTextilRecuperados: 0,
+      publicacionesActivas: 0,
+      prendasRecirculadas: 0,
     });
   });
 });

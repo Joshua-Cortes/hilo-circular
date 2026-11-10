@@ -29,6 +29,14 @@ export type EstadoPrenda = (typeof ESTADOS_PRENDA)[number];
 export const ESTADOS_DONACION = ["registrada", "recibida", "cancelada"] as const;
 export const PRECISIONES_UBICACION = ["exacta", "aproximada"] as const;
 
+/** Condición de una prenda publicada en el mercado de segunda mano. */
+export const CONDICIONES_PRENDA = ["nueva_con_etiqueta", "como_nueva", "buen_estado", "con_detalles"] as const;
+export type CondicionPrenda = (typeof CONDICIONES_PRENDA)[number];
+
+/** Ciclo de vida de una publicación: el vendedor la marca reservada o vendida desde "Mis publicaciones". */
+export const ESTADOS_PUBLICACION = ["disponible", "reservada", "vendida"] as const;
+export type EstadoPublicacion = (typeof ESTADOS_PUBLICACION)[number];
+
 /** Comunas de la Región de Coquimbo donde opera el piloto (La Serena y Coquimbo) y su entorno inmediato. */
 export const COMUNAS = ["La Serena", "Coquimbo", "Ovalle", "Vicuña", "Andacollo", "La Higuera"] as const;
 
@@ -57,6 +65,13 @@ export const ETIQUETAS_ESTADO: Record<EstadoPrenda, string> = {
   buen_estado: "En buen estado, lista para usar",
   dano_reparable: "Tiene un daño que se puede arreglar",
   muy_deteriorada: "Muy deteriorada, ya no se puede usar",
+};
+
+export const ETIQUETAS_CONDICION: Record<CondicionPrenda, string> = {
+  nueva_con_etiqueta: "Nueva, con etiqueta",
+  como_nueva: "Como nueva",
+  buen_estado: "Buen estado",
+  con_detalles: "Con detalles (se indican)",
 };
 
 /**

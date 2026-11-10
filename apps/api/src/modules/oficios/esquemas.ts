@@ -2,7 +2,7 @@ import { z } from "zod";
 import { CATEGORIAS_SERVICIO, COMUNAS, PRECISIONES_UBICACION, TIPOS_PRENDA } from "../../lib/catalogo.js";
 
 /** Acepta "+56 9 1234 5678", "912345678", etc. y lo normaliza a "56912345678". */
-const celularChile = z
+export const celularChile = z
   .string()
   .transform((valor) => valor.replace(/[\s\-()+]/g, ""))
   .transform((valor) => (valor.startsWith("56") ? valor : `56${valor}`))
