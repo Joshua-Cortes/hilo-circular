@@ -15,7 +15,8 @@ import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 import { formatearPrecio } from "../componentes/TarjetaOficio";
 import { ChipFiltro } from "../componentes/ui/ChipFiltro";
-import { api, type Catalogo, ErrorApi, leerSesionActual, type MiOficio } from "../lib/api";
+import { api, type Catalogo, ErrorApi, type MiOficio } from "../lib/api";
+import { useSesion } from "../lib/sesion";
 
 type PasoFormulario = 1 | 2 | 3;
 
@@ -40,7 +41,7 @@ function limpiarCelularLocal(valor: string | null | undefined): string {
 }
 
 export function MiTaller() {
-  const sesion = useMemo(() => leerSesionActual(), []);
+  const { usuario: sesion } = useSesion();
   const tituloPasoRef = useRef<HTMLHeadingElement>(null);
 
   const [catalogo, setCatalogo] = useState<Catalogo | null>(null);
@@ -287,9 +288,9 @@ export function MiTaller() {
   // Ruta protegida por rol ("oficio")
   if (sesion?.rol !== "oficio") {
     return (
-      <section className="mx-auto max-w-3xl px-5 py-16" aria-labelledby="titulo-acceso-oficio">
-        <div className="tarjeta p-8 md:p-10">
-          <Lock className="size-10 text-terracota" aria-hidden="true" />
+      <section className="mx-auto max-w-3xl px-4 md:px-6 py-16" aria-labelledby="titulo-acceso-oficio">
+        <div className="bento bg-superficie">
+          <Lock className="size-10 text-hoja" aria-hidden="true" />
           <h1 id="titulo-acceso-oficio" className="mt-4 text-4xl font-semibold">
             Espacio para oficios de reparación
           </h1>
@@ -303,12 +304,20 @@ export function MiTaller() {
             acompañamiento directo en La Serena y Coquimbo.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/reparar" className="boton-primario">
-              Ver talleres publicados
-            </Link>
-            <Link to="/" className="boton-secundario">
-              Volver al inicio
-            </Link>
+            {sesion ? (
+              <Link to="/reparar" className="boton-primario">
+                Ver talleres publicados
+              </Link>
+            ) : (
+              <>
+                <Link to="/ingresar?modo=registro&volver=%2Fmi-taller" className="boton-primario">
+                  Crear cuenta de oficio
+                </Link>
+                <Link to="/ingresar?volver=%2Fmi-taller" className="boton-secundario">
+                  Ya tengo cuenta
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -317,17 +326,17 @@ export function MiTaller() {
 
   if (cargandoInicial) {
     return (
-      <section className="mx-auto max-w-3xl px-5 py-16" aria-live="polite">
-        <div className="tarjeta h-80 animate-pulse p-8" aria-hidden="true" />
+      <section className="mx-auto max-w-3xl px-4 md:px-6 py-16" aria-live="polite">
+        <div className="bento h-80 animate-pulse bg-superficie" aria-hidden="true" />
       </section>
     );
   }
 
   return (
-    <section className="mx-auto max-w-3xl px-5 py-12 md:py-16" aria-labelledby="titulo-mi-taller">
+    <section className="mx-auto max-w-3xl px-4 md:px-6 py-12 md:py-16" aria-labelledby="titulo-mi-taller">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="font-bold tracking-widest text-terracota-tinta uppercase">CU3 · Gestión de taller</p>
+          <p className="font-bold tracking-widest text-hoja-oscura uppercase">01 · Reparar · Mi taller</p>
           <h1 id="titulo-mi-taller" className="mt-1 text-4xl font-semibold md:text-5xl">
             {perfilExistente ? "Editar mi taller" : "Publicar mi taller"}
           </h1>
@@ -337,12 +346,12 @@ export function MiTaller() {
           <button type="button" onClick={alternarEstadoActivo} className="boton-secundario px-5">
             {perfilExistente.activo ? (
               <>
-                <PauseCircle className="size-5 shrink-0 text-terracota-tinta" aria-hidden="true" />
+                <PauseCircle className="size-5 shrink-0 text-hoja-oscura" aria-hidden="true" />
                 <span>Pausar mi taller</span>
               </>
             ) : (
               <>
-                <PlayCircle className="size-5 shrink-0 text-salvia" aria-hidden="true" />
+                <PlayCircle className="size-5 shrink-0 text-hoja-oscura" aria-hidden="true" />
                 <span>Reactivar mi taller</span>
               </>
             )}
@@ -352,14 +361,12 @@ export function MiTaller() {
 
       {/* Indicador de pasos */}
       <div className="tarjeta mt-8 p-6 md:p-8">
-        <p className="text-sm font-bold tracking-widest text-terracota-tinta uppercase">Paso {paso} de 3</p>
+        <p className="text-sm font-bold tracking-widest text-hoja-oscura uppercase">Paso {paso} de 3</p>
         <div className="mt-2 flex gap-2" aria-hidden="true">
           {[1, 2, 3].map((n) => (
             <span
               key={n}
-              className={`h-2 flex-1 rounded-full transition-colors duration-300 ${
-                n <= paso ? "bg-terracota" : "bg-borde"
-              }`}
+              className={`h-2 flex-1 rounded-full transition-colors duration-300 ${n <= paso ? "bg-hoja" : "bg-borde"}`}
             />
           ))}
         </div>
@@ -381,17 +388,17 @@ export function MiTaller() {
         {errorGeneral && (
           <div
             role="alert"
-            className="mt-6 flex items-start gap-3 rounded-xl border-2 border-terracota-tinta bg-terracota-claro/30 p-4"
+            className="mt-6 flex items-start gap-3 rounded-xl border-2 border-alerta bg-alerta-clara p-4"
           >
-            <AlertCircle className="mt-0.5 size-6 shrink-0 text-terracota-tinta" aria-hidden="true" />
-            <p className="font-bold text-bosque">{errorGeneral}</p>
+            <AlertCircle className="mt-0.5 size-6 shrink-0 text-alerta" aria-hidden="true" />
+            <p className="font-bold text-tinta">{errorGeneral}</p>
           </div>
         )}
 
         {mensajeExito && (
-          <output className="mt-6 flex items-start gap-3 rounded-xl border-2 border-salvia bg-salvia-claro p-4">
-            <CheckCircle2 className="mt-0.5 size-6 shrink-0 text-salvia" aria-hidden="true" />
-            <p className="font-bold text-bosque">{mensajeExito}</p>
+          <output className="mt-6 flex items-start gap-3 rounded-xl border-2 border-hoja-oscura bg-menta-clara p-4">
+            <CheckCircle2 className="mt-0.5 size-6 shrink-0 text-hoja-oscura" aria-hidden="true" />
+            <p className="font-bold text-tinta">{mensajeExito}</p>
           </output>
         )}
 
@@ -407,7 +414,7 @@ export function MiTaller() {
 
             <div className="mt-6 grid gap-5">
               <div>
-                <label htmlFor="campo-nombre" className="block text-base font-bold text-bosque">
+                <label htmlFor="campo-nombre" className="block text-base font-bold text-tinta">
                   Nombre de tu taller o tu nombre
                 </label>
                 <span id="pista-nombre" className="block text-sm text-tinta-suave">
@@ -420,17 +427,17 @@ export function MiTaller() {
                   onChange={(e) => setNombrePublico(e.target.value)}
                   aria-describedby="pista-nombre"
                   aria-invalid={Boolean(erroresCampo.nombrePublico)}
-                  className="mt-1.5 min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-crema px-4 text-lg font-bold text-bosque"
+                  className="mt-1.5 min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-fondo px-4 text-lg font-bold text-tinta"
                 />
                 {erroresCampo.nombrePublico && (
-                  <p role="alert" className="mt-1.5 text-sm font-bold text-terracota-tinta">
+                  <p role="alert" className="mt-1.5 text-sm font-bold text-alerta">
                     {erroresCampo.nombrePublico}
                   </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="campo-descripcion" className="block text-base font-bold text-bosque">
+                <label htmlFor="campo-descripcion" className="block text-base font-bold text-tinta">
                   Cuéntanos brevemente tu experiencia (opcional)
                 </label>
                 <textarea
@@ -438,17 +445,17 @@ export function MiTaller() {
                   rows={3}
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border-2 border-borde-fuerte bg-crema p-4 text-base text-bosque"
+                  className="mt-1.5 w-full rounded-xl border-2 border-borde-fuerte bg-fondo p-4 text-base text-tinta"
                 />
                 {erroresCampo.descripcion && (
-                  <p role="alert" className="mt-1.5 text-sm font-bold text-terracota-tinta">
+                  <p role="alert" className="mt-1.5 text-sm font-bold text-alerta">
                     {erroresCampo.descripcion}
                   </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="campo-whatsapp" className="block text-base font-bold text-bosque">
+                <label htmlFor="campo-whatsapp" className="block text-base font-bold text-tinta">
                   Tu número de WhatsApp
                 </label>
                 <span id="pista-whatsapp" className="block text-sm text-tinta-suave">
@@ -457,7 +464,7 @@ export function MiTaller() {
                 <div className="mt-1.5 flex items-center gap-2">
                   <span
                     aria-hidden="true"
-                    className="inline-flex min-h-12 items-center rounded-xl border-2 border-borde bg-salvia-claro px-4 text-lg font-bold text-bosque"
+                    className="inline-flex min-h-12 items-center rounded-xl border-2 border-borde bg-menta-clara px-4 text-lg font-bold text-tinta"
                   >
                     +56 9
                   </span>
@@ -470,24 +477,24 @@ export function MiTaller() {
                     onChange={(e) => setWhatsapp(e.target.value)}
                     aria-describedby="pista-whatsapp"
                     aria-invalid={Boolean(erroresCampo.whatsapp)}
-                    className="min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-crema px-4 text-lg font-bold text-bosque"
+                    className="min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-fondo px-4 text-lg font-bold text-tinta"
                   />
                 </div>
                 {erroresCampo.whatsapp && (
-                  <p role="alert" className="mt-1.5 text-sm font-bold text-terracota-tinta">
+                  <p role="alert" className="mt-1.5 text-sm font-bold text-alerta">
                     {erroresCampo.whatsapp}
                   </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="campo-telefono" className="block text-base font-bold text-bosque">
+                <label htmlFor="campo-telefono" className="block text-base font-bold text-tinta">
                   Teléfono para llamadas (opcional si ya pusiste WhatsApp)
                 </label>
                 <div className="mt-1.5 flex items-center gap-2">
                   <span
                     aria-hidden="true"
-                    className="inline-flex min-h-12 items-center rounded-xl border-2 border-borde bg-salvia-claro px-4 text-lg font-bold text-bosque"
+                    className="inline-flex min-h-12 items-center rounded-xl border-2 border-borde bg-menta-clara px-4 text-lg font-bold text-tinta"
                   >
                     +56 9
                   </span>
@@ -499,11 +506,11 @@ export function MiTaller() {
                     value={telefono}
                     onChange={(e) => setTelefono(e.target.value)}
                     aria-invalid={Boolean(erroresCampo.telefono)}
-                    className="min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-crema px-4 text-lg font-bold text-bosque"
+                    className="min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-fondo px-4 text-lg font-bold text-tinta"
                   />
                 </div>
                 {erroresCampo.telefono && (
-                  <p role="alert" className="mt-1.5 text-sm font-bold text-terracota-tinta">
+                  <p role="alert" className="mt-1.5 text-sm font-bold text-alerta">
                     {erroresCampo.telefono}
                   </p>
                 )}
@@ -530,7 +537,7 @@ export function MiTaller() {
             </p>
 
             <fieldset className="mt-6 border-0 p-0">
-              <legend className="block text-base font-bold text-bosque">Comuna</legend>
+              <legend className="block text-base font-bold text-tinta">Comuna</legend>
               <div className="mt-2 flex flex-wrap gap-2">
                 {(catalogo?.comunas ?? ["La Serena", "Coquimbo"]).map((c) => (
                   <ChipFiltro key={c} activo={comuna === c} onClick={() => setComuna(c)}>
@@ -541,7 +548,7 @@ export function MiTaller() {
             </fieldset>
 
             <fieldset className="mt-6 border-0 p-0">
-              <legend className="block text-base font-bold text-bosque">Elige tu sector de referencia</legend>
+              <legend className="block text-base font-bold text-tinta">Elige tu sector de referencia</legend>
               <span className="block text-sm text-tinta-suave">
                 Puedes pulsar tu barrio o usar el botón de GPS de tu teléfono
               </span>
@@ -566,21 +573,19 @@ export function MiTaller() {
             </fieldset>
 
             <fieldset className="mt-6 border-0 p-0">
-              <legend className="block text-base font-bold text-bosque">Privacidad de tu dirección</legend>
+              <legend className="block text-base font-bold text-tinta">Privacidad de tu dirección</legend>
               <div className="mt-2 grid gap-3">
                 <button
                   type="button"
                   onClick={() => setPrecisionUbicacion("aproximada")}
                   aria-pressed={precisionUbicacion === "aproximada"}
                   className={`flex cursor-pointer items-start gap-3 rounded-2xl border-2 p-4 text-left transition-colors ${
-                    precisionUbicacion === "aproximada"
-                      ? "border-bosque bg-salvia-claro"
-                      : "border-borde-fuerte bg-crema"
+                    precisionUbicacion === "aproximada" ? "border-tinta bg-menta-clara" : "border-borde-fuerte bg-fondo"
                   }`}
                 >
-                  <Shield className="mt-1 size-6 shrink-0 text-salvia" aria-hidden="true" />
+                  <Shield className="mt-1 size-6 shrink-0 text-hoja-oscura" aria-hidden="true" />
                   <div>
-                    <span className="block text-lg font-bold text-bosque">
+                    <span className="block text-lg font-bold text-tinta">
                       Trabajo desde mi casa (ubicación aproximada · recomendado)
                     </span>
                     <span className="mt-0.5 block text-sm text-tinta-suave">
@@ -594,12 +599,12 @@ export function MiTaller() {
                   onClick={() => setPrecisionUbicacion("exacta")}
                   aria-pressed={precisionUbicacion === "exacta"}
                   className={`flex cursor-pointer items-start gap-3 rounded-2xl border-2 p-4 text-left transition-colors ${
-                    precisionUbicacion === "exacta" ? "border-bosque bg-salvia-claro" : "border-borde-fuerte bg-crema"
+                    precisionUbicacion === "exacta" ? "border-tinta bg-menta-clara" : "border-borde-fuerte bg-fondo"
                   }`}
                 >
-                  <CheckCircle2 className="mt-1 size-6 shrink-0 text-terracota-tinta" aria-hidden="true" />
+                  <CheckCircle2 className="mt-1 size-6 shrink-0 text-alerta" aria-hidden="true" />
                   <div>
-                    <span className="block text-lg font-bold text-bosque">Tengo un local comercial a la calle</span>
+                    <span className="block text-lg font-bold text-tinta">Tengo un local comercial a la calle</span>
                     <span className="mt-0.5 block text-sm text-tinta-suave">
                       Muestra tu dirección comercial y el punto exacto en las búsquedas.
                     </span>
@@ -610,7 +615,7 @@ export function MiTaller() {
 
             {precisionUbicacion === "exacta" && (
               <div className="mt-5">
-                <label htmlFor="campo-direccion" className="block text-base font-bold text-bosque">
+                <label htmlFor="campo-direccion" className="block text-base font-bold text-tinta">
                   Dirección de tu local
                 </label>
                 <input
@@ -618,10 +623,10 @@ export function MiTaller() {
                   type="text"
                   value={direccion}
                   onChange={(e) => setDireccion(e.target.value)}
-                  className="mt-1.5 min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-crema px-4 text-base font-bold text-bosque"
+                  className="mt-1.5 min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-fondo px-4 text-base font-bold text-tinta"
                 />
                 {erroresCampo.direccion && (
-                  <p role="alert" className="mt-1.5 text-sm font-bold text-terracota-tinta">
+                  <p role="alert" className="mt-1.5 text-sm font-bold text-alerta">
                     {erroresCampo.direccion}
                   </p>
                 )}
@@ -657,11 +662,11 @@ export function MiTaller() {
                 {perfilExistente.servicios.map((s) => (
                   <li
                     key={s.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-borde bg-crema p-4"
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-borde bg-fondo p-4"
                   >
                     <div>
-                      <p className="text-lg font-bold text-bosque">
-                        {s.titulo} <span className="text-terracota-tinta">· {formatearPrecio(s.precioDesde)}</span>
+                      <p className="text-lg font-bold text-tinta">
+                        {s.titulo} <span className="text-hoja-oscura">· {formatearPrecio(s.precioDesde)}</span>
                       </p>
                       <p className="mt-1 text-sm text-tinta-suave">
                         {etiquetasCategoria.get(s.categoria) ?? s.categoria} ·{" "}
@@ -672,7 +677,7 @@ export function MiTaller() {
                       type="button"
                       onClick={() => manejarEliminarServicio(s.id)}
                       aria-label={`Eliminar servicio ${s.titulo}`}
-                      className="boton border border-terracota-tinta px-4 text-sm text-terracota-tinta hover:bg-terracota-claro/40"
+                      className="boton border border-hoja-oscura px-4 text-sm text-hoja-oscura hover:bg-lima/40"
                     >
                       <Trash2 className="size-4 shrink-0" aria-hidden="true" />
                       <span>Quitar</span>
@@ -686,7 +691,7 @@ export function MiTaller() {
               <h3 className="text-2xl font-semibold">Agregar un servicio</h3>
 
               <fieldset className="mt-4 border-0 p-0">
-                <legend className="block text-base font-bold text-bosque">Categoría del oficio</legend>
+                <legend className="block text-base font-bold text-tinta">Categoría del oficio</legend>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {catalogo?.categorias.map((c) => (
                     <ChipFiltro key={c.id} activo={catServicio === c.id} onClick={() => setCatServicio(c.id)}>
@@ -697,7 +702,7 @@ export function MiTaller() {
               </fieldset>
 
               <div className="mt-5">
-                <label htmlFor="campo-titulo-servicio" className="block text-base font-bold text-bosque">
+                <label htmlFor="campo-titulo-servicio" className="block text-base font-bold text-tinta">
                   Nombre del servicio
                 </label>
                 <span id="pista-titulo-servicio" className="block text-sm text-tinta-suave">
@@ -710,17 +715,17 @@ export function MiTaller() {
                   onChange={(e) => setTituloServicio(e.target.value)}
                   aria-describedby="pista-titulo-servicio"
                   aria-invalid={Boolean(erroresCampo.titulo)}
-                  className="mt-1.5 min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-crema px-4 text-base font-bold text-bosque"
+                  className="mt-1.5 min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-fondo px-4 text-base font-bold text-tinta"
                 />
                 {erroresCampo.titulo && (
-                  <p role="alert" className="mt-1.5 text-sm font-bold text-terracota-tinta">
+                  <p role="alert" className="mt-1.5 text-sm font-bold text-alerta">
                     {erroresCampo.titulo}
                   </p>
                 )}
               </div>
 
               <fieldset className="mt-5 border-0 p-0">
-                <legend className="block text-base font-bold text-bosque">¿En qué prendas haces este arreglo?</legend>
+                <legend className="block text-base font-bold text-tinta">¿En qué prendas haces este arreglo?</legend>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {catalogo?.prendas.map((p) => (
                     <ChipFiltro
@@ -733,7 +738,7 @@ export function MiTaller() {
                   ))}
                 </div>
                 {erroresCampo.prendas && (
-                  <p role="alert" className="mt-1.5 text-sm font-bold text-terracota-tinta">
+                  <p role="alert" className="mt-1.5 text-sm font-bold text-alerta">
                     {erroresCampo.prendas}
                   </p>
                 )}
@@ -741,7 +746,7 @@ export function MiTaller() {
 
               <div className="mt-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <label htmlFor="campo-precio" className="block text-base font-bold text-bosque">
+                  <label htmlFor="campo-precio" className="block text-base font-bold text-tinta">
                     Precio referencial &ldquo;Desde&rdquo; (CLP)
                   </label>
                   <ChipFiltro activo={aConvenir} onClick={() => setAConvenir((v) => !v)}>
@@ -758,11 +763,11 @@ export function MiTaller() {
                     value={precioDesde}
                     onChange={(e) => setPrecioDesde(e.target.value)}
                     aria-invalid={Boolean(erroresCampo.precioDesde)}
-                    className="mt-2 min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-crema px-4 text-lg font-bold text-bosque"
+                    className="mt-2 min-h-12 w-full rounded-xl border-2 border-borde-fuerte bg-fondo px-4 text-lg font-bold text-tinta"
                   />
                 )}
                 {erroresCampo.precioDesde && (
-                  <p role="alert" className="mt-1.5 text-sm font-bold text-terracota-tinta">
+                  <p role="alert" className="mt-1.5 text-sm font-bold text-alerta">
                     {erroresCampo.precioDesde}
                   </p>
                 )}

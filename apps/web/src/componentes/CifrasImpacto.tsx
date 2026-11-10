@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
 import { api, type Impacto } from "../lib/api";
+import { cn } from "../lib/cn";
 
 const formato = new Intl.NumberFormat("es-CL");
 
-const CIFRAS: { clave: keyof Impacto; etiqueta: string; sufijo?: string }[] = [
-  { clave: "oficiosActivos", etiqueta: "oficios con perfil activo" },
-  { clave: "puntosDonacion", etiqueta: "puntos de donación" },
-  { clave: "contactosReparacion", etiqueta: "contactos para reparar" },
-  { clave: "kgTextilRecuperados", etiqueta: "de textil recuperado", sufijo: " kg" },
+/** Una cifra por pilar, más los kilos: así se lee de un vistazo qué aporta cada parte. */
+const CIFRAS: { clave: keyof Impacto; etiqueta: string; sufijo?: string; tono: string }[] = [
+  { clave: "contactosReparacion", etiqueta: "personas contactaron a un oficio para reparar", tono: "bg-menta" },
+  { clave: "puntosDonacion", etiqueta: "puntos de donación en La Serena y Coquimbo", tono: "bg-superficie" },
+  { clave: "publicacionesActivas", etiqueta: "prendas buscando nueva dueña o dueño", tono: "bg-kraft-clara" },
+  {
+    clave: "kgTextilRecuperados",
+    etiqueta: "de textil recuperado en donaciones confirmadas",
+    sufijo: " kg",
+    tono: "bg-lima",
+  },
 ];
 
 export function CifrasImpacto() {
@@ -26,13 +33,14 @@ export function CifrasImpacto() {
   }
 
   return (
-    <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-tarjeta border border-borde bg-borde lg:grid-cols-4">
-      {CIFRAS.map(({ clave, etiqueta, sufijo }) => (
-        <div key={clave} className="bg-papel p-6">
-          <dt className="text-tinta-suave">{etiqueta}</dt>
+    <dl className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {CIFRAS.map(({ clave, etiqueta, sufijo, tono }) => (
+        // En el DOM va primero <dt> (lo exige <dl>); flex-col-reverse deja la cifra arriba.
+        <div key={clave} className={cn("bento flex min-h-44 flex-col-reverse justify-between", tono)}>
+          <dt className="mt-6 max-w-[16rem] font-bold text-tinta-800">{etiqueta}</dt>
           {/* La altura fija evita saltos de diseño mientras carga. */}
-          <dd className="mt-1 h-12 font-display text-4xl font-semibold tabular-nums">
-            {impacto ? `${formato.format(impacto[clave])}${sufijo ?? ""}` : <span className="text-borde">—</span>}
+          <dd className="h-14 font-display text-5xl font-bold tracking-tight tabular-nums">
+            {impacto ? `${formato.format(impacto[clave])}${sufijo ?? ""}` : <span className="text-tinta/20">—</span>}
           </dd>
         </div>
       ))}

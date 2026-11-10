@@ -7,6 +7,7 @@ export type Catalogo = {
   prendas: (Opcion & { pesoKg: number })[];
   estados: Opcion[];
   comunas: string[];
+  condiciones: Opcion[];
 };
 
 export type Recomendacion = {
@@ -25,7 +26,96 @@ export type Impacto = {
   donacionesPendientes: number;
   prendasDonadas: number;
   kgTextilRecuperados: number;
+  publicacionesActivas: number;
+  prendasRecirculadas: number;
 };
+
+export type Horario = { dia: number; abre: string; cierra: string };
+
+export type PuntoDonacion = {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  comuna: string;
+  direccion: string;
+  ubicacion: { lat: number; lng: number };
+  distanciaKm: number | null;
+  horarios: Horario[];
+  abiertoAhora: boolean;
+  prendasAceptadas: string[];
+  necesidadesActuales: string;
+  aceptaDanada: boolean;
+  telefono: string | null;
+  email: string | null;
+  verificado: boolean;
+};
+
+export type ItemDonacion = { prenda: string; cantidad: number; estado: "buen_estado" };
+
+export type EstadoPublicacion = "disponible" | "reservada" | "vendida";
+
+export type Publicacion = {
+  id: string;
+  titulo: string;
+  prenda: string;
+  talla: string;
+  condicion: string;
+  precio: number;
+  comuna: string;
+  estado: EstadoPublicacion;
+  foto: string | null;
+  vendedor: { nombre: string };
+  creadoEn: string;
+};
+
+export type DetallePublicacion = Publicacion & {
+  descripcion: string;
+  fotos: string[];
+  vendedor: { nombre: string; desde: string };
+  canales: { whatsapp: boolean; chat: boolean };
+  esMia: boolean;
+  whatsapp?: string | null;
+};
+
+export type MiPublicacion = Publicacion & { conversaciones: number };
+
+export type DatosPublicar = {
+  titulo: string;
+  descripcion: string;
+  prenda: string;
+  talla: string;
+  condicion: string;
+  precio: number;
+  comuna: string;
+  whatsapp: string | null;
+  fotos: { mime: string; datos: string }[];
+};
+
+export type FiltrosMercado = {
+  prenda?: string;
+  comuna?: string;
+  q?: string;
+  soloRegalo?: boolean;
+  orden?: "recientes" | "precio_asc" | "precio_desc";
+};
+
+export type ResumenConversacion = {
+  id: string;
+  publicacion: { id: string; titulo: string; precio: number; estado: EstadoPublicacion; foto: string | null };
+  rol: "comprador" | "vendedor";
+  contraparte: { nombre: string };
+  ultimoMensaje: string | null;
+  ultimoMensajeEn: string;
+  noLeidos: number;
+};
+
+export type Mensaje = { id: string; texto: string; creadoEn: string; mio: boolean };
+
+export type Conversacion = ResumenConversacion & { mensajes: Mensaje[] };
+
+export type Usuario = { id: string; nombre: string; email: string; rol: "persona" | "oficio" | "fundacion" | "admin" };
+
+export type Sesion = { token: string; usuario: Usuario };
 
 export type ServicioPublico = {
   id: string;
@@ -117,42 +207,14 @@ export type DetalleError = {
 
 export const CLAVE_TOKEN = "hilo_token";
 
-export type SesionUsuario = {
-  id: string;
-  email: string;
-  nombre: string;
-  rol: "persona" | "oficio" | "fundacion" | "admin";
-};
-
-export function leerSesionActual(): SesionUsuario | null {
-  try {
-    const token = localStorage.getItem(CLAVE_TOKEN);
-    if (!token) return null;
-    const partes = token.split(".");
-    if (partes.length !== 3 || !partes[1]) return null;
-    const base64 = partes[1].replace(/-/g, "+").replace(/_/g, "/");
-    const payload = JSON.parse(atob(base64));
-    if (typeof payload.exp === "number" && payload.exp * 1000 < Date.now()) {
-      return null;
-    }
-    if (!payload.sub || !payload.rol) return null;
-    return {
-      id: String(payload.sub),
-      email: String(payload.email ?? ""),
-      nombre: String(payload.nombre ?? ""),
-      rol: payload.rol,
-    };
-  } catch {
-    return null;
-  }
-}
-
 export class ErrorApi extends Error {
   constructor(
     readonly status: number,
     readonly codigo: string,
     message: string,
     readonly detalles: DetalleError[] = [],
+    /** Detalles que no son errores por campo, por ejemplo { prendas: [...] } en una donación rechazada. */
+    readonly extra: Record<string, unknown> = {},
   ) {
     super(message);
   }
@@ -185,12 +247,18 @@ export async function pedir<T>(ruta: string, opciones?: RequestInit): Promise<T>
 
   const cuerpo = await respuesta.json().catch(() => null);
   if (!respuesta.ok) {
-    const detalles = Array.isArray(cuerpo?.error?.detalles) ? (cuerpo.error.detalles as DetalleError[]) : [];
+    const crudos = cuerpo?.error?.detalles;
+    const detalles = Array.isArray(crudos) ? (crudos as DetalleError[]) : [];
+    if (respuesta.status === 401 && token) {
+      // La sesión guardada ya no sirve (expiró o cambió el secreto): se avisa para cerrarla.
+      window.dispatchEvent(new Event("hilo:sesion-expirada"));
+    }
     throw new ErrorApi(
       respuesta.status,
       cuerpo?.error?.codigo ?? "error",
       cuerpo?.error?.mensaje ?? "Ocurrió un problema. Intenta de nuevo en unos minutos.",
       detalles,
+      crudos && !Array.isArray(crudos) && typeof crudos === "object" ? crudos : {},
     );
   }
   return cuerpo.datos as T;
@@ -241,4 +309,63 @@ export const api = {
     pedir<void>(`/oficios/yo/servicios/${encodeURIComponent(servicioId)}`, {
       method: "DELETE",
     }),
+
+  // Cuentas
+  registro: (datos: { nombre: string; email: string; clave: string; rol: "persona" | "oficio" }) =>
+    pedir<Sesion>("/auth/registro", { method: "POST", body: JSON.stringify(datos) }),
+  ingreso: (datos: { email: string; clave: string }) =>
+    pedir<Sesion>("/auth/ingreso", { method: "POST", body: JSON.stringify(datos) }),
+
+  // Donar
+  puntosDonacion: (filtros: { prenda?: string; aceptaDanada?: boolean } = {}) => {
+    const params = new URLSearchParams();
+    if (filtros.prenda) params.set("prenda", filtros.prenda);
+    if (filtros.aceptaDanada !== undefined) params.set("aceptaDanada", String(filtros.aceptaDanada));
+    const qs = params.toString();
+    return pedir<PuntoDonacion[]>(qs ? `/fundaciones?${qs}` : "/fundaciones");
+  },
+  registrarDonacion: (fundacionId: string, items: ItemDonacion[]) =>
+    pedir<{ id: string; totalPrendas: number; kgEstimados: number }>("/donaciones", {
+      method: "POST",
+      body: JSON.stringify({ fundacionId, items }),
+    }),
+
+  // Mercado
+  mercado: (filtros: FiltrosMercado = {}) => {
+    const params = new URLSearchParams();
+    if (filtros.prenda) params.set("prenda", filtros.prenda);
+    if (filtros.comuna) params.set("comuna", filtros.comuna);
+    if (filtros.q && filtros.q.trim().length >= 2) params.set("q", filtros.q.trim());
+    if (filtros.soloRegalo) params.set("soloRegalo", "true");
+    if (filtros.orden) params.set("orden", filtros.orden);
+    const qs = params.toString();
+    return pedir<Publicacion[]>(qs ? `/mercado?${qs}` : "/mercado");
+  },
+  publicacion: (id: string) => pedir<DetallePublicacion>(`/mercado/${encodeURIComponent(id)}`),
+  misPublicaciones: () => pedir<MiPublicacion[]>("/mercado/mias"),
+  publicar: (datos: DatosPublicar) =>
+    pedir<DetallePublicacion>("/mercado", { method: "POST", body: JSON.stringify(datos) }),
+  cambiarEstadoPublicacion: (id: string, estado: EstadoPublicacion) =>
+    pedir<DetallePublicacion>(`/mercado/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ estado }),
+    }),
+  eliminarPublicacion: (id: string) => pedir<void>(`/mercado/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  whatsappPublicacion: (id: string) =>
+    pedir<{ url: string }>(`/mercado/${encodeURIComponent(id)}/contacto`, { method: "POST" }),
+  abrirConversacion: (publicacionId: string, texto?: string) =>
+    pedir<{ id: string }>(`/mercado/${encodeURIComponent(publicacionId)}/conversacion`, {
+      method: "POST",
+      body: JSON.stringify(texto ? { texto } : {}),
+    }),
+
+  // Chat
+  conversaciones: () => pedir<ResumenConversacion[]>("/conversaciones"),
+  conversacion: (id: string) => pedir<Conversacion>(`/conversaciones/${encodeURIComponent(id)}`),
+  enviarMensaje: (id: string, texto: string) =>
+    pedir<Mensaje>(`/conversaciones/${encodeURIComponent(id)}/mensajes`, {
+      method: "POST",
+      body: JSON.stringify({ texto }),
+    }),
+  noLeidos: () => pedir<{ total: number }>("/conversaciones/no-leidos"),
 };
