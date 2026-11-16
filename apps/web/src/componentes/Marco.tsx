@@ -97,16 +97,8 @@ function MenuCuenta() {
           )}
 
           {usuario.rol === "fundacion" && (
-            <Link
-              role="menuitem"
-              to="/mi-fundacion"
-              className={opcion}
-              onClick={() => setAbierto(false)}
-            >
-              <HeartHandshake
-                className="size-5 text-hoja-oscura"
-                aria-hidden="true"
-              />
+            <Link role="menuitem" to="/mi-fundacion" className={opcion} onClick={() => setAbierto(false)}>
+              <HeartHandshake className="size-5 text-hoja-oscura" aria-hidden="true" />
               Mi fundación
             </Link>
           )}

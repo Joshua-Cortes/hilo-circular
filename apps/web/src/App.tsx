@@ -90,7 +90,15 @@ export function App() {
           <Route path="/mi-taller" element={<MiTaller />} />
           <Route path="/donar" element={<Donar />} />
           <Route path="/mercado" element={<Mercado />} />
-          <Route path="/mi-fundacion" element={<RequiereSesion> <MiFundacion /> </RequiereSesion>} />
+          <Route
+            path="/mi-fundacion"
+            element={
+              <RequiereSesion>
+                {" "}
+                <MiFundacion />{" "}
+              </RequiereSesion>
+            }
+          />
           <Route
             path="/mercado/publicar"
             element={

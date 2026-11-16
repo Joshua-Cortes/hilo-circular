@@ -70,10 +70,7 @@ export type DatosActualizarFundacion = Partial<
   >
 >;
 
-export type EstadoDonacion =
-  | "registrada"
-  | "recibida"
-  | "cancelada";
+export type EstadoDonacion = "registrada" | "recibida" | "cancelada";
 
 export type DonacionFundacion = {
   id: string;
@@ -383,8 +380,7 @@ export const api = {
   // Donar
 
   // Panel de fundación
-  miFundacion: () =>
-    pedir<MiFundacion>("/fundaciones/yo"),
+  miFundacion: () => pedir<MiFundacion>("/fundaciones/yo"),
 
   actualizarMiFundacion: (datos: DatosActualizarFundacion) =>
     pedir<MiFundacion>("/fundaciones/yo", {
@@ -392,16 +388,10 @@ export const api = {
       body: JSON.stringify(datos),
     }),
 
-  misDonaciones: () =>
-    pedir<DonacionFundacion[]>("/donaciones/mias"),
-
+  misDonaciones: () => pedir<DonacionFundacion[]>("/donaciones/mias"),
 
   confirmarRecepcion: (id: string) =>
-    pedir<Omit<DonacionFundacion, "fundacion">>(
-      `/donaciones/${encodeURIComponent(id)}/recepcion`,
-      { method: "PATCH" },
-    ),
-
+    pedir<Omit<DonacionFundacion, "fundacion">>(`/donaciones/${encodeURIComponent(id)}/recepcion`, { method: "PATCH" }),
 
   puntosDonacion: (filtros: { prenda?: string; aceptaDanada?: boolean } = {}) => {
     const params = new URLSearchParams();
