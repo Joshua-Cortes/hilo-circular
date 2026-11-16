@@ -37,8 +37,8 @@ describe("GET /api/oficios (búsqueda)", () => {
 
   it("filtra por oficio y tipo de prenda", async () => {
     const res = await entorno.api().get("/api/oficios").query({ categoria: "zapateria", prenda: "calzado" });
-    expect(res.body.datos).toHaveLength(1);
-    expect(res.body.datos[0].nombrePublico).toBe("Zapatería Don Lucho");
+    expect(res.body.datos.length).toBeGreaterThanOrEqual(1);
+    expect(res.body.datos.map((o: { nombrePublico: string }) => o.nombrePublico)).toContain("Zapatería Don Lucho");
   });
 
   it("busca por texto en nombre, descripción o servicios", async () => {

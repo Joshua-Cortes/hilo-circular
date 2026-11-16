@@ -56,8 +56,8 @@ Cuando el equipo visite presencialmente a una costurera o zapatero adulto mayor 
 
 | # | Nombre del taller / oficio | Categoría | Comuna y sector | Ubicación | Estado del acuerdo | Responsable |
 |---|---|---|---|---|---|---|
-| 1 | *Por completar en terreno* | Costura | La Serena | Aproximada | Pendiente contacto | Equipo |
-| 2 | *Por completar en terreno* | Zapatería | La Serena | Exacta | Pendiente contacto | Equipo |
+| 1 | **AirClean · Restauración de Calzado** | Zapatería y marroquinería | La Serena | Aproximada (~1 km) | **Confirmado y cargado en plataforma** (`$12.000` limpieza profunda) | Bastian Pizarro |
+| 2 | *Por completar en terreno* | Costura | La Serena | Aproximada | Pendiente contacto | Equipo |
 | 3 | *Por completar en terreno* | Costura | Coquimbo | Aproximada | Pendiente contacto | Equipo |
 | 4 | *Por completar en terreno* | Tejido | La Serena | Aproximada | Pendiente contacto | Equipo |
 | 5 | *Por completar en terreno* | Tapicería | Coquimbo | Aproximada | Pendiente contacto | Equipo |

@@ -130,6 +130,36 @@ const OFICIOS_DEMO = [
       },
     ],
   },
+  {
+    emailCuenta: "bastianpizarrogarate@gmail.com",
+    nombreCuenta: "Bastián Pizarro · AirClean",
+    conAccesoClaveDemo: true,
+    nombrePublico: "AirClean · Restauración de Calzado",
+    descripcion:
+      "Limpieza profunda de zapatillas, restauración de calzado, blanqueamiento de suelas y recuperación de color en jockeys y gorras en La Serena.",
+    comuna: "La Serena",
+    lat: -29.9085,
+    lng: -71.2465,
+    precisionUbicacion: "aproximada" as const,
+    whatsapp: "56900000006",
+    verificado: true,
+    servicios: [
+      {
+        categoria: "zapateria" as const,
+        titulo: "Limpieza profunda y restauración de calzado",
+        descripcion: "Limpieza completa interior y exterior, desinfección, gamuza y blanqueamiento de entresuela.",
+        prendas: ["calzado" as const],
+        precioDesde: 12000,
+      },
+      {
+        categoria: "marroquineria" as const,
+        titulo: "Restauración y teñido de jockeys y accesorios",
+        descripcion: "Recuperación de color, teñido y limpieza profunda de gorras, bolsos y mochilas.",
+        prendas: ["bolso_cartera" as const, "otro" as const],
+        precioDesde: 10000,
+      },
+    ],
+  },
 ];
 
 const FUNDACIONES_DEMO = [
@@ -416,9 +446,7 @@ async function cuentaDemo(db: Db, datos: { email: string; nombre: string; rol: R
 export async function sembrar(db: Db): Promise<boolean> {
   let sembro = false;
 
-  const [{ n: totalOficios }] = await db.select({ n: count() }).from(oficios);
-  if (totalOficios === 0) {
-    await sembrarOficios(db);
+  if (await sembrarOficios(db)) {
     sembro = true;
   }
 
@@ -493,21 +521,40 @@ async function sembrarMercado(db: Db) {
     .where(eq(conversaciones.id, conversacion.id));
 }
 
-async function sembrarOficios(db: Db) {
-  for (const [i, { servicios: serviciosDemo, ...perfil }] of OFICIOS_DEMO.entries()) {
-    const [usuario] = await db
-      .insert(usuarios)
-      .values({
-        email: `oficio${i + 1}@demo.hilocircular.cl`,
-        passwordHash: SIN_ACCESO,
-        nombre: perfil.nombrePublico,
-        rol: "oficio",
-      })
-      .returning();
+async function sembrarOficios(db: Db): Promise<boolean> {
+  const existentes = new Set((await db.select({ nombre: oficios.nombrePublico }).from(oficios)).map((o) => o.nombre));
+  let agregados = false;
+  let hashDemo: string | null = null;
+
+  for (const [i, item] of OFICIOS_DEMO.entries()) {
+    if (existentes.has(item.nombrePublico)) continue;
+    const {
+      servicios: serviciosDemo,
+      emailCuenta,
+      nombreCuenta,
+      conAccesoClaveDemo,
+      ...perfil
+    } = item as (typeof OFICIOS_DEMO)[number] & {
+      emailCuenta?: string;
+      nombreCuenta?: string;
+      conAccesoClaveDemo?: boolean;
+    };
+
+    const email = emailCuenta ?? `oficio${i + 1}@demo.hilocircular.cl`;
+    const nombre = nombreCuenta ?? perfil.nombrePublico;
+    let passwordHash = SIN_ACCESO;
+    if (conAccesoClaveDemo) {
+      hashDemo ??= await hashearClave(CLAVE_DEMO);
+      passwordHash = hashDemo;
+    }
+
+    const usuario = await cuentaDemo(db, { email, nombre, rol: "oficio" }, passwordHash);
     const [oficio] = await db
       .insert(oficios)
       .values({ ...perfil, usuarioId: usuario.id })
       .returning();
     await db.insert(servicios).values(serviciosDemo.map((s) => ({ ...s, oficioId: oficio.id })));
+    agregados = true;
   }
+  return agregados;
 }
