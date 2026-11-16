@@ -44,6 +44,7 @@
   body {
     @apply bg-fondo font-sans text-tinta antialiased;
     line-height: 1.55;
+    overflow-x: clip;
   }
 
   h1,

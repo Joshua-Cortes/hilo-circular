@@ -17,7 +17,7 @@ export function ChipFiltro({ activo, className, children, ...resto }: PropsChipF
       type="button"
       aria-pressed={activo}
       className={cn(
-        "inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded-full border-2 px-4 text-base font-bold transition-colors duration-200 ease-hilo",
+        "inline-flex min-h-12 shrink-0 cursor-pointer items-center gap-2 rounded-full border-2 px-4 text-base font-bold transition-colors duration-200 ease-hilo",
         activo
           ? "border-tinta bg-tinta text-fondo"
           : "border-borde bg-superficie text-tinta hover:border-hoja hover:bg-menta-clara",

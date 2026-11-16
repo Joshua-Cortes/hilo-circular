@@ -1,6 +1,7 @@
 import { AlertCircle, ArrowLeft, CheckCircle2, MapPin, MessageCircle, Phone, Shield } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
+import { MapaUbicacionOficio } from "../componentes/MapaUbicacionOficio";
 import { formatearPrecio } from "../componentes/TarjetaOficio";
 import { api, type CanalContacto, type Catalogo, type OficioPublico } from "../lib/api";
 
@@ -153,6 +154,15 @@ export function PerfilOficio() {
               <h2 id="titulo-contacto" className="text-3xl font-semibold">
                 Ubicación y contacto directo
               </h2>
+
+              <div className="mt-4">
+                <MapaUbicacionOficio
+                  lat={oficio.ubicacion.lat}
+                  lng={oficio.ubicacion.lng}
+                  precision={oficio.ubicacion.precision}
+                  nombre={oficio.nombrePublico}
+                />
+              </div>
 
               {oficio.ubicacion.precision === "aproximada" ? (
                 <div className="mt-4 flex items-start gap-3 rounded-2xl bg-menta-clara p-4 text-tinta">
