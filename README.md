@@ -27,6 +27,7 @@ En 2021 llegaron a Chile cerca de 156 mil toneladas de ropa usada y alrededor de
 | [05 · API](docs/05-api.md) | Endpoints, parámetros y errores |
 | [06 · Sistema de diseño](docs/06-sistema-de-diseno.md) | Paleta con contraste verificado, tipografía, reglas de accesibilidad |
 | [07 · Planificación](docs/07-planificacion.md) | Plan semanal, estado real y replanificación |
+| [08 · Manual para oficios y fundaciones](docs/08-manual-oficios-y-fundaciones.md) | Guía paso a paso en lenguaje simple para talleres de reparación y puntos de donación |
 | [Mockup CU1 y CU3 · Oficios](docs/mockups/oficios.html) | Mockup interactivo de búsqueda, perfil y creación de oficio |
 | [Mockup CU2 · Donar](docs/mockups/donar.html) | Mockup interactivo de alta fidelidad (se abre en el navegador) |
 | [Entregas](docs/entregas/) | Presentaciones y documentos entregados en cada hito |
@@ -55,13 +56,24 @@ Para usar un PostgreSQL real, copia `apps/api/.env.example` como `apps/api/.env`
 
 > **Usuarios de Windows:** npm falla si la ruta de la carpeta tiene el carácter `&` (por ejemplo, `Informatica & Sociedad`), porque cmd.exe lo interpreta como separador de comandos. Clona el repositorio en una ruta sin `&`.
 
-## Estructura
+## Estructura y rutas implementadas
 
 ```text
-apps/api   API REST: Node.js 22 · Express 5 · Drizzle ORM · PostgreSQL/PGlite · Zod · Vitest
+apps/api   API REST: Node.js 22 · Express 5 · Drizzle ORM · PostgreSQL/PGlite · Zod · Vitest (59 tests)
 apps/web   SPA: React 19 · TypeScript · Vite · Tailwind CSS 4 · Leaflet
-docs/      Fundamentación, diseño, mockups y entregas
+docs/      Fundamentación, arquitectura, casos de uso, manual de uso, mockups y entregas
 ```
+
+| Ruta en la web | Camino | Qué hace |
+|---|---|---|
+| `/` | Inicio | Asistente de orientación (CU0), cifras del problema, grilla bento con los 3 caminos e indicadores en vivo |
+| `/reparar` y `/reparar/:id` | **1 · Reparar** | Búsqueda de talleres por oficio, prenda, texto y cercanía (CU1); perfil con precios, mapa aproximado (~1 km) y contacto por WhatsApp |
+| `/mi-taller` | **1 · Reparar** | Formulario guiado de 3 pasos para publicar o editar un taller y gestionar sus servicios (CU3) |
+| `/donar` | **2 · Donar** | Filtro de calidad de 5 preguntas, mapa Leaflet con 10 puntos de donación/reciclaje y registro de donación validada (CU2) |
+| `/mercado`, `/mercado/:id`, `/mercado/publicar`, `/mercado/mias` | **3 · Mercado** | Publicación de prendas con fotos, búsqueda, reserva/venta (CU7) |
+| `/mensajes` | **3 · Mercado** | Chat interno entre personas compradoras y vendedoras (CU8) |
+| `/ingresar` | Transversal | Inicio de sesión y registro por rol (`persona`, `oficio`, `fundacion`) (CU4) |
+| `/impacto` | Transversal | Indicadores públicos de impacto por camino (CU6) |
 
 ## Cómo trabajamos
 
