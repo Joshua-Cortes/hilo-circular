@@ -86,10 +86,10 @@ Los tokens se definen en [`apps/web/src/estilos.css`](../apps/web/src/estilos.cs
 
 ## Lista de verificación antes de entregar una pantalla
 
-- [ ] Íconos SVG de Lucide con `aria-hidden` si son decorativos, y botones con texto o `aria-label`.
-- [ ] `cursor-pointer` y estado hover en todo lo que se puede pulsar.
-- [ ] Contraste de texto ≥ 4.5:1, verificado con la tabla anterior.
-- [ ] Foco visible al navegar con Tab.
-- [ ] Objetivos táctiles ≥ 48 px.
-- [ ] Probado a 375 px de ancho.
-- [ ] Se respeta `prefers-reduced-motion`.
+- [x] Íconos SVG de Lucide con `aria-hidden` si son decorativos, y botones con texto o `aria-label`.
+- [x] `cursor-pointer` y estado hover en todo lo que se puede pulsar.
+- [x] Contraste de texto ≥ 4.5:1, verificado con la tabla anterior.
+- [x] Foco visible al navegar con Tab.
+- [x] Objetivos táctiles ≥ 48 px.
+- [x] Probado a 375 px de ancho.
+- [x] Se respeta `prefers-reduced-motion`.

@@ -145,7 +145,7 @@ function Encabezado() {
 
   const claseEnlace = ({ isActive }: { isActive: boolean }) =>
     cn(
-      "flex min-h-11 items-center rounded-full px-4 font-bold transition-colors duration-200",
+      "flex min-h-12 items-center rounded-full px-4 font-bold transition-colors duration-200",
       isActive ? "bg-tinta text-fondo" : "text-tinta hover:bg-menta-clara",
     );
 

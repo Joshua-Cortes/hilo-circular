@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
+import { MapaUbicacionOficio } from "../componentes/MapaUbicacionOficio";
 import { formatearPrecio } from "../componentes/TarjetaOficio";
 import { ChipFiltro } from "../componentes/ui/ChipFiltro";
 import { api, type Catalogo, ErrorApi, type MiOficio } from "../lib/api";
@@ -570,6 +571,21 @@ export function MiTaller() {
                 <LocateFixed className="size-4 shrink-0" aria-hidden="true" />
                 <span>Usar ubicación actual de mi teléfono</span>
               </button>
+              <div className="mt-4">
+                <MapaUbicacionOficio
+                  lat={lat}
+                  lng={lng}
+                  precision={precisionUbicacion}
+                  nombre={nombrePublico || "Mi taller"}
+                  alElegirPunto={(nuevoLat, nuevoLng) => {
+                    setLat(nuevoLat);
+                    setLng(nuevoLng);
+                  }}
+                />
+                <p className="mt-1.5 text-sm text-tinta-suave">
+                  También puedes tocar cualquier punto del mapa para ajustar tu ubicación.
+                </p>
+              </div>
             </fieldset>
 
             <fieldset className="mt-6 border-0 p-0">

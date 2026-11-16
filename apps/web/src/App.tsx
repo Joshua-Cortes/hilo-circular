@@ -1,20 +1,25 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Link, Route, Routes, useLocation } from "react-router";
 import { CifrasImpacto } from "./componentes/CifrasImpacto";
 import { EncabezadoPagina } from "./componentes/EncabezadoPagina";
 import { Marco } from "./componentes/Marco";
 import { RequiereSesion } from "./componentes/RequiereSesion";
-import { DetallePublicacion } from "./paginas/DetallePublicacion";
-import { Donar } from "./paginas/Donar";
 import { Ingresar } from "./paginas/Ingresar";
 import { Inicio } from "./paginas/Inicio";
-import { Mensajes } from "./paginas/Mensajes";
 import { Mercado } from "./paginas/Mercado";
-import { MisPublicaciones } from "./paginas/MisPublicaciones";
-import { MiTaller } from "./paginas/MiTaller";
-import { PerfilOficio } from "./paginas/PerfilOficio";
-import { Publicar } from "./paginas/Publicar";
 import { Reparar } from "./paginas/Reparar";
+
+const Donar = lazy(() => import("./paginas/Donar").then((m) => ({ default: m.Donar })));
+const PerfilOficio = lazy(() => import("./paginas/PerfilOficio").then((m) => ({ default: m.PerfilOficio })));
+const MiTaller = lazy(() => import("./paginas/MiTaller").then((m) => ({ default: m.MiTaller })));
+const DetallePublicacion = lazy(() =>
+  import("./paginas/DetallePublicacion").then((m) => ({ default: m.DetallePublicacion })),
+);
+const Publicar = lazy(() => import("./paginas/Publicar").then((m) => ({ default: m.Publicar })));
+const MisPublicaciones = lazy(() =>
+  import("./paginas/MisPublicaciones").then((m) => ({ default: m.MisPublicaciones })),
+);
+const Mensajes = lazy(() => import("./paginas/Mensajes").then((m) => ({ default: m.Mensajes })));
 
 function NoEncontrada() {
   return (
@@ -69,42 +74,51 @@ export function App() {
   return (
     <Marco>
       <VolverArriba />
-      <Routes>
-        <Route path="/" element={<Inicio />} />
-        <Route path="/reparar" element={<Reparar />} />
-        <Route path="/reparar/:id" element={<PerfilOficio />} />
-        <Route path="/mi-taller" element={<MiTaller />} />
-        <Route path="/donar" element={<Donar />} />
-        <Route path="/mercado" element={<Mercado />} />
-        <Route
-          path="/mercado/publicar"
-          element={
-            <RequiereSesion>
-              <Publicar />
-            </RequiereSesion>
-          }
-        />
-        <Route
-          path="/mercado/mias"
-          element={
-            <RequiereSesion>
-              <MisPublicaciones />
-            </RequiereSesion>
-          }
-        />
-        <Route path="/mercado/:id" element={<DetallePublicacion />} />
-        <Route
-          path="/mensajes/:id?"
-          element={
-            <RequiereSesion>
-              <Mensajes />
-            </RequiereSesion>
-          }
-        />
-        <Route path="/ingresar" element={<Ingresar />} />
-        <Route path="/impacto" element={<PaginaImpacto />} />
-        <Route path="*" element={<NoEncontrada />} />
-      </Routes>
+      <Suspense
+        fallback={
+          <div className="mx-auto max-w-7xl px-4 py-12 md:px-6" aria-live="polite">
+            <div className="bento h-64 animate-pulse bg-superficie" aria-hidden="true" />
+            <span className="sr-only">Cargando pantalla…</span>
+          </div>
+        }
+      >
+        <Routes>
+          <Route path="/" element={<Inicio />} />
+          <Route path="/reparar" element={<Reparar />} />
+          <Route path="/reparar/:id" element={<PerfilOficio />} />
+          <Route path="/mi-taller" element={<MiTaller />} />
+          <Route path="/donar" element={<Donar />} />
+          <Route path="/mercado" element={<Mercado />} />
+          <Route
+            path="/mercado/publicar"
+            element={
+              <RequiereSesion>
+                <Publicar />
+              </RequiereSesion>
+            }
+          />
+          <Route
+            path="/mercado/mias"
+            element={
+              <RequiereSesion>
+                <MisPublicaciones />
+              </RequiereSesion>
+            }
+          />
+          <Route path="/mercado/:id" element={<DetallePublicacion />} />
+          <Route
+            path="/mensajes/:id?"
+            element={
+              <RequiereSesion>
+                <Mensajes />
+              </RequiereSesion>
+            }
+          />
+          <Route path="/ingresar" element={<Ingresar />} />
+          <Route path="/impacto" element={<PaginaImpacto />} />
+          <Route path="*" element={<NoEncontrada />} />
+        </Routes>
+      </Suspense>
     </Marco>
   );
 }
