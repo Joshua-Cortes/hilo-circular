@@ -14,14 +14,17 @@ El control oficial del avance semanal se lleva en los **issues y milestones de G
 | 17–23 nov | Pulido de la interfaz y versión móvil | Pruebas con usuarios reales | Corrección de errores | Versión casi final |
 | 24–26 nov | Documentación final | Preparación de la entrega y la presentación | Video demo final | Entrega final (26 nov) |
 
-## Estado real al 3 de noviembre
+## Estado real al 16 de noviembre
 
 | Semana | Planificado | Real | Desvío |
 |---|---|---|---|
 | 14–19 oct | Hito 1 | Presentación entregada el 15 oct | Al día |
-| 20–26 oct | Mockups y modelo de datos | No se avanzó en esa semana (recuperado el 2 nov con mockups CU1/CU2/CU3 y modelo ER) | Recuperado |
-| 27 oct–2 nov | Proyecto base | Repositorio, CI, API completa con 44 tests, modelo de datos, configuración UI y mockups completos | Al día |
-| 3–9 nov | Módulo 1 | Pantalla `/reparar` (búsqueda, filtros y perfil CU1), formulario `/mi-taller` (CU3) y endpoints listos | Adelantado |
+| 20–26 oct | Mockups y modelo de datos | Recuperado el 2 nov con mockups CU1/CU2/CU3 y modelo ER | Recuperado |
+| 27 oct–2 nov | Proyecto base | Repositorio, CI, API completa, modelo de datos, configuración UI y mockups completos | Al día |
+| 3–9 nov | Módulo 1 | Pantalla `/reparar` (CU1), formulario `/mi-taller` (CU3), autenticación `/ingresar` (CU4) y endpoints listos | Completado |
+| 10–16 nov | Demo integrada | Rediseño bento en 3 caminos: Reparar (`/reparar`, `/mi-taller`), Donar (`/donar` con filtro de calidad + mapa Leaflet) y Mercado (`/mercado`, `/mensajes` con chat interno, 59 tests) | Completado |
+| 17–23 nov | Versión casi final | Pulido responsivo móvil (375–1440 px), mapa de oficio, carga diferida (`React.lazy`) y accesibilidad verificada (#20) | Adelantado |
+| 24–26 nov | Entrega final | Manual breve para oficios y fundaciones (`08-manual-oficios-y-fundaciones.md`) y documentación al día (#23) | Adelantado |
 
 ### Lo que se adelantó (1 nov)
 
