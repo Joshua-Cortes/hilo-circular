@@ -155,7 +155,7 @@ const OFICIOS_DEMO = [
         categoria: "marroquineria" as const,
         titulo: "Restauración y teñido de jockeys y accesorios",
         descripcion: "Recuperación de color, teñido y limpieza profunda de gorras, bolsos y mochilas.",
-        prendas: ["bolso_cartera" as const, "otro" as const],
+        prendas: ["bolso_cartera" as const, "calzado" as const],
         precioDesde: 10000,
       },
     ],
