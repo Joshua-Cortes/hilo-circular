@@ -28,6 +28,7 @@ En 2021 llegaron a Chile cerca de 156 mil toneladas de ropa usada y alrededor de
 | [06 · Sistema de diseño](docs/06-sistema-de-diseno.md) | Paleta con contraste verificado, tipografía, reglas de accesibilidad |
 | [07 · Planificación](docs/07-planificacion.md) | Plan semanal, estado real y replanificación |
 | [08 · Manual para oficios y fundaciones](docs/08-manual-oficios-y-fundaciones.md) | Guía paso a paso en lenguaje simple para talleres de reparación y puntos de donación |
+| [09 · Consentimiento y onboarding](docs/09-consentimiento-y-onboarding.md) | Plantilla de consentimiento informado y ficha de acompañamiento presencial (#14) |
 | [Mockup CU1 y CU3 · Oficios](docs/mockups/oficios.html) | Mockup interactivo de búsqueda, perfil y creación de oficio |
 | [Mockup CU2 · Donar](docs/mockups/donar.html) | Mockup interactivo de alta fidelidad (se abre en el navegador) |
 | [Entregas](docs/entregas/) | Presentaciones y documentos entregados en cada hito |
