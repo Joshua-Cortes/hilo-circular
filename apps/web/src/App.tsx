@@ -12,6 +12,7 @@ import { Reparar } from "./paginas/Reparar";
 const Donar = lazy(() => import("./paginas/Donar").then((m) => ({ default: m.Donar })));
 const PerfilOficio = lazy(() => import("./paginas/PerfilOficio").then((m) => ({ default: m.PerfilOficio })));
 const MiTaller = lazy(() => import("./paginas/MiTaller").then((m) => ({ default: m.MiTaller })));
+const MiFundacion = lazy(() => import("./paginas/MiFundacion").then((m) => ({ default: m.MiFundacion })));
 const DetallePublicacion = lazy(() =>
   import("./paginas/DetallePublicacion").then((m) => ({ default: m.DetallePublicacion })),
 );
@@ -89,6 +90,7 @@ export function App() {
           <Route path="/mi-taller" element={<MiTaller />} />
           <Route path="/donar" element={<Donar />} />
           <Route path="/mercado" element={<Mercado />} />
+          <Route path="/mi-fundacion" element={<RequiereSesion> <MiFundacion /> </RequiereSesion>} />
           <Route
             path="/mercado/publicar"
             element={
