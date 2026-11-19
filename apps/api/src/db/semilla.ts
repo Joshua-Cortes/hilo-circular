@@ -1,9 +1,13 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { count, eq } from "drizzle-orm";
 import type { Rol } from "../lib/catalogo.js";
 import { hashearClave } from "../lib/claves.js";
 import type { Db } from "./client.js";
 import {
   conversaciones,
+  fotosPublicacion,
   fundaciones,
   type Horario,
   mensajes,
@@ -312,12 +316,16 @@ const CUENTAS_DEMO = [
 
 const VENDEDORES_DEMO = ["Valentina (demo)", "Matías (demo)", "Javiera (demo)"];
 
-type PublicacionDemo = Omit<typeof publicaciones.$inferInsert, "vendedorId"> & { vendedor: number };
+type PublicacionDemo = Omit<typeof publicaciones.$inferInsert, "vendedorId"> & {
+  vendedor: number;
+  fotoArchivo?: string;
+};
 
 /** vendedor: índice en VENDEDORES_DEMO; -1 = la cuenta demo@hilocircular.cl. */
 const PUBLICACIONES_DEMO: PublicacionDemo[] = [
   {
     vendedor: 0,
+    fotoArchivo: "parka.jpg",
     titulo: "Parka acolchada azul marino",
     descripcion: "La usé un invierno. Abriga harto y tiene capucha desmontable. Sin manchas ni roturas.",
     prenda: "chaqueta_abrigo",
@@ -329,6 +337,7 @@ const PUBLICACIONES_DEMO: PublicacionDemo[] = [
   },
   {
     vendedor: 1,
+    fotoArchivo: "jeans.jpg",
     titulo: "Jeans tiro alto celeste",
     descripcion: "Corte recto, me quedaron grandes. Se pueden probar en el centro de Coquimbo.",
     prenda: "pantalon",
@@ -340,6 +349,7 @@ const PUBLICACIONES_DEMO: PublicacionDemo[] = [
   },
   {
     vendedor: 2,
+    fotoArchivo: "uniforme.jpg",
     titulo: "Uniforme escolar completo",
     descripcion: "Falda, polera piqué y polerón. Mi hija ya pasó a media; lo regalo a quien lo necesite.",
     prenda: "uniforme_escolar",
@@ -351,6 +361,7 @@ const PUBLICACIONES_DEMO: PublicacionDemo[] = [
   },
   {
     vendedor: 0,
+    fotoArchivo: "zapatillas.jpg",
     titulo: "Zapatillas de running blancas",
     descripcion: "Usadas tres veces, me quedaron chicas. Incluyen la caja.",
     prenda: "calzado",
@@ -362,6 +373,7 @@ const PUBLICACIONES_DEMO: PublicacionDemo[] = [
   },
   {
     vendedor: 1,
+    fotoArchivo: "vestido.jpg",
     titulo: "Vestido de lino verde oliva",
     descripcion: "Nuevo, todavía con etiqueta. Ideal para el verano.",
     prenda: "falda_vestido",
@@ -373,6 +385,7 @@ const PUBLICACIONES_DEMO: PublicacionDemo[] = [
   },
   {
     vendedor: 2,
+    fotoArchivo: "sweater.jpg",
     titulo: "Sweater de lana tejido a mano",
     descripcion: "Tejido por mi abuela, lana gruesa color crudo.",
     prenda: "sweater",
@@ -384,6 +397,7 @@ const PUBLICACIONES_DEMO: PublicacionDemo[] = [
   },
   {
     vendedor: 0,
+    fotoArchivo: "bebe.jpg",
     titulo: "Lote de ropa de bebé (8 prendas)",
     descripcion: "Bodies, piluchos y dos pantalones, de 6 a 12 meses. Todo lavado.",
     prenda: "ropa_infantil",
@@ -395,6 +409,7 @@ const PUBLICACIONES_DEMO: PublicacionDemo[] = [
   },
   {
     vendedor: 1,
+    fotoArchivo: "cartera.jpg",
     titulo: "Cartera de cuero café",
     descripcion: "Tiene un roce en una esquina (sale en la descripción para que no haya sorpresas).",
     prenda: "bolso_cartera",
@@ -406,6 +421,7 @@ const PUBLICACIONES_DEMO: PublicacionDemo[] = [
   },
   {
     vendedor: -1,
+    fotoArchivo: "camisa.jpg",
     titulo: "Camisa de mezclilla oversize",
     descripcion: "Muy poco uso. Puedo entregarla en la ULS.",
     prenda: "polera_camisa",
@@ -468,7 +484,53 @@ export async function sembrar(db: Db): Promise<boolean> {
     sembro = true;
   }
 
+  if (await sembrarFotosMercado(db)) {
+    sembro = true;
+  }
+
   return sembro;
+}
+
+const DIRECTORIO_ACTUAL = dirname(fileURLToPath(import.meta.url));
+
+function leerFotoDemo(archivo: string): string | null {
+  const rutas = [
+    resolve(DIRECTORIO_ACTUAL, "fotos-demo", archivo),
+    resolve(DIRECTORIO_ACTUAL, "../../src/db/fotos-demo", archivo),
+  ];
+  for (const ruta of rutas) {
+    if (existsSync(ruta)) {
+      return readFileSync(ruta).toString("base64");
+    }
+  }
+  return null;
+}
+
+async function sembrarFotosMercado(db: Db): Promise<boolean> {
+  const existentes = await db.select({ id: publicaciones.id, titulo: publicaciones.titulo }).from(publicaciones);
+  const conFoto = new Set(
+    (await db.select({ id: fotosPublicacion.publicacionId }).from(fotosPublicacion)).map((f) => f.id),
+  );
+  const fotosPorTitulo = new Map(
+    PUBLICACIONES_DEMO.filter((p) => p.fotoArchivo).map((p) => [p.titulo, p.fotoArchivo as string]),
+  );
+
+  let agregadas = false;
+  for (const pub of existentes) {
+    if (conFoto.has(pub.id)) continue;
+    const archivo = fotosPorTitulo.get(pub.titulo);
+    if (!archivo) continue;
+    const datos = leerFotoDemo(archivo);
+    if (!datos) continue;
+    await db.insert(fotosPublicacion).values({
+      publicacionId: pub.id,
+      orden: 0,
+      mime: "image/jpeg",
+      datos,
+    });
+    agregadas = true;
+  }
+  return agregadas;
 }
 
 async function sembrarMercado(db: Db) {
@@ -483,7 +545,7 @@ async function sembrarMercado(db: Db) {
 
   const ahora = Date.now();
   const creadas = [];
-  for (const [i, { vendedor, ...publicacion }] of PUBLICACIONES_DEMO.entries()) {
+  for (const [i, { vendedor, fotoArchivo: _foto, ...publicacion }] of PUBLICACIONES_DEMO.entries()) {
     // Fechas escalonadas para que "más recientes" tenga un orden creíble.
     const creadoEn = new Date(ahora - (i + 1) * 5 * 60 * 60 * 1000);
     const [fila] = await db
