@@ -10,6 +10,7 @@ import { Mercado } from "./paginas/Mercado";
 import { Reparar } from "./paginas/Reparar";
 
 const Donar = lazy(() => import("./paginas/Donar").then((m) => ({ default: m.Donar })));
+const Ajustes = lazy(() => import("./paginas/Ajustes").then((m) => ({ default: m.Ajustes })));
 const PerfilOficio = lazy(() => import("./paginas/PerfilOficio").then((m) => ({ default: m.PerfilOficio })));
 const MiTaller = lazy(() => import("./paginas/MiTaller").then((m) => ({ default: m.MiTaller })));
 const DetallePublicacion = lazy(() =>
@@ -115,6 +116,14 @@ export function App() {
             }
           />
           <Route path="/ingresar" element={<Ingresar />} />
+          <Route
+            path="/ajustes"
+            element={
+              <RequiereSesion>
+                <Ajustes />
+              </RequiereSesion>
+            }
+          />
           <Route path="/impacto" element={<PaginaImpacto />} />
           <Route path="*" element={<NoEncontrada />} />
         </Routes>

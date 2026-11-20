@@ -7,6 +7,7 @@ type ValorSesion = {
   usuario: Usuario | null;
   noLeidos: number;
   iniciar: (sesion: Sesion) => void;
+  actualizarUsuario: (usuario: Usuario) => void;
   cerrar: () => void;
   refrescarNoLeidos: () => void;
 };
@@ -36,6 +37,15 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
       // Sin almacenamiento la sesión dura lo que dure la pestaña.
     }
     setUsuario(sesion.usuario);
+  }, []);
+
+  const actualizarUsuario = useCallback((nuevoUsuario: Usuario) => {
+    try {
+      localStorage.setItem(CLAVE_USUARIO, JSON.stringify(nuevoUsuario));
+    } catch {
+      // Sin almacenamiento el cambio vive en memoria hasta recargar.
+    }
+    setUsuario(nuevoUsuario);
   }, []);
 
   const cerrar = useCallback(() => {
@@ -73,8 +83,8 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   }, [usuario, refrescarNoLeidos]);
 
   const valor = useMemo(
-    () => ({ usuario, noLeidos, iniciar, cerrar, refrescarNoLeidos }),
-    [usuario, noLeidos, iniciar, cerrar, refrescarNoLeidos],
+    () => ({ usuario, noLeidos, iniciar, actualizarUsuario, cerrar, refrescarNoLeidos }),
+    [usuario, noLeidos, iniciar, actualizarUsuario, cerrar, refrescarNoLeidos],
   );
   return <ContextoSesion.Provider value={valor}>{children}</ContextoSesion.Provider>;
 }

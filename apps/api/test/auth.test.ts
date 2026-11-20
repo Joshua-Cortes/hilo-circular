@@ -74,4 +74,62 @@ describe("cuentas", () => {
       .send({ email: "oficio1@demo.hilocircular.cl", clave: "!demo-sin-acceso" });
     expect(sinAcceso.status).toBe(401);
   });
+
+  it("actualiza nombre y correo exigiendo la clave actual y verificando unicidad", async () => {
+    const reg = await entorno
+      .api()
+      .post("/api/auth/registro")
+      .send({ nombre: "Lucas", email: "lucas@correo.cl", clave: "unaclave123" });
+    const auth = { Authorization: `Bearer ${reg.body.datos.token}` };
+
+    const soloNombre = await entorno.api().patch("/api/auth/yo").set(auth).send({ nombre: "Lucas Vega" });
+    expect(soloNombre.status).toBe(200);
+    expect(soloNombre.body.datos.nombre).toBe("Lucas Vega");
+
+    const sinClave = await entorno.api().patch("/api/auth/yo").set(auth).send({ email: "lucas.nuevo@correo.cl" });
+    expect(sinClave.status).toBe(401);
+
+    const duplicado = await entorno
+      .api()
+      .patch("/api/auth/yo")
+      .set(auth)
+      .send({ email: "demo@hilocircular.cl", claveActual: "unaclave123" });
+    expect(duplicado.status).toBe(409);
+
+    const correoOk = await entorno
+      .api()
+      .patch("/api/auth/yo")
+      .set(auth)
+      .send({ email: "lucas.nuevo@correo.cl", claveActual: "unaclave123" });
+    expect(correoOk.status).toBe(200);
+    expect(correoOk.body.datos.email).toBe("lucas.nuevo@correo.cl");
+  });
+
+  it("cambia la contraseña validando la actual", async () => {
+    const reg = await entorno
+      .api()
+      .post("/api/auth/registro")
+      .send({ nombre: "Sofía", email: "sofia@correo.cl", clave: "unaclave123" });
+    const auth = { Authorization: `Bearer ${reg.body.datos.token}` };
+
+    const malaActual = await entorno
+      .api()
+      .patch("/api/auth/clave")
+      .set(auth)
+      .send({ claveActual: "incorrecta", claveNueva: "nuevaclave456" });
+    expect(malaActual.status).toBe(401);
+
+    const cambiada = await entorno
+      .api()
+      .patch("/api/auth/clave")
+      .set(auth)
+      .send({ claveActual: "unaclave123", claveNueva: "nuevaclave456" });
+    expect(cambiada.status).toBe(200);
+
+    const ingresoNuevo = await entorno
+      .api()
+      .post("/api/auth/ingreso")
+      .send({ email: "sofia@correo.cl", clave: "nuevaclave456" });
+    expect(ingresoNuevo.status).toBe(200);
+  });
 });

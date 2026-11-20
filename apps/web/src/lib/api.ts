@@ -249,7 +249,7 @@ export async function pedir<T>(ruta: string, opciones?: RequestInit): Promise<T>
   if (!respuesta.ok) {
     const crudos = cuerpo?.error?.detalles;
     const detalles = Array.isArray(crudos) ? (crudos as DetalleError[]) : [];
-    if (respuesta.status === 401 && token) {
+    if (respuesta.status === 401 && token && cuerpo?.error?.codigo !== "credenciales_invalidas") {
       // La sesión guardada ya no sirve (expiró o cambió el secreto): se avisa para cerrarla.
       window.dispatchEvent(new Event("hilo:sesion-expirada"));
     }
@@ -315,6 +315,10 @@ export const api = {
     pedir<Sesion>("/auth/registro", { method: "POST", body: JSON.stringify(datos) }),
   ingreso: (datos: { email: string; clave: string }) =>
     pedir<Sesion>("/auth/ingreso", { method: "POST", body: JSON.stringify(datos) }),
+  actualizarCuenta: (datos: { nombre?: string; email?: string; claveActual?: string }) =>
+    pedir<Usuario>("/auth/yo", { method: "PATCH", body: JSON.stringify(datos) }),
+  cambiarClave: (datos: { claveActual: string; claveNueva: string }) =>
+    pedir<{ ok: boolean }>("/auth/clave", { method: "PATCH", body: JSON.stringify(datos) }),
 
   // Donar
   puntosDonacion: (filtros: { prenda?: string; aceptaDanada?: boolean } = {}) => {
