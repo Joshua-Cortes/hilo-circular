@@ -1,4 +1,4 @@
-import { LogOut, Menu, MessageCircle, Plus, Store, User, Wrench, X } from "lucide-react";
+import { LogOut, Menu, MessageCircle, Plus, Settings, Store, User, Wrench, X } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router";
 import { cn } from "../lib/cn";
@@ -95,6 +95,9 @@ function MenuCuenta() {
               <Wrench className="size-5 text-hoja-oscura" aria-hidden="true" /> Mi taller
             </Link>
           )}
+          <Link role="menuitem" to="/ajustes" className={opcion} onClick={() => setAbierto(false)}>
+            <Settings className="size-5 text-hoja-oscura" aria-hidden="true" /> Ajustes
+          </Link>
           <button
             role="menuitem"
             type="button"
