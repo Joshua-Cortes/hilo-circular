@@ -22,5 +22,15 @@ export function rutasAuth(db: Db) {
     res.json({ datos: await servicio.obtenerYo(db, usuarioDe(req).id) });
   });
 
+  rutas.patch("/yo", requiereSesion(), async (req, res) => {
+    const datos = validar(esquemas.actualizarCuenta, req.body);
+    res.json({ datos: await servicio.actualizarYo(db, usuarioDe(req).id, datos) });
+  });
+
+  rutas.patch("/clave", requiereSesion(), async (req, res) => {
+    const datos = validar(esquemas.cambiarClave, req.body);
+    res.json({ datos: await servicio.actualizarClave(db, usuarioDe(req).id, datos) });
+  });
+
   return rutas;
 }

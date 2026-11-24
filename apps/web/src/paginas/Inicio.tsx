@@ -106,12 +106,19 @@ export function Inicio() {
             </p>
           </div>
 
-          <div className="bento flex flex-col justify-between bg-kraft-clara">
-            <p className="flex items-center gap-2 font-display text-5xl font-bold tracking-tight">
-              <Anillo className="text-kraft-tinta" /> ~60 %
+          <div className="bento relative flex flex-col justify-between overflow-hidden bg-tinta text-fondo">
+            <img
+              src="/img/desierto-atacama.jpg"
+              alt="Montañas de ropa desechada en el desierto de Atacama"
+              className="absolute inset-0 size-full object-cover opacity-55"
+            />
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-tinta via-tinta/75 to-tinta/40" />
+            <p className="relative z-10 flex items-center gap-2 font-display text-5xl font-bold tracking-tight text-lima">
+              <Anillo className="text-lima" /> ~60 %
             </p>
-            <p className="mt-6 font-bold text-tinta-800">
-              terminó en vertederos del desierto de Atacama. Cada prenda que circula aquí es una menos allá.
+            <p className="relative z-10 mt-6 font-bold text-fondo">
+              terminó en vertederos del desierto de Atacama.{" "}
+              <span className="font-normal text-fondo/90">Cada prenda que circula aquí es una menos allá.</span>
             </p>
           </div>
 

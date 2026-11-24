@@ -5,7 +5,7 @@ import { usuarios } from "../../db/schema.js";
 import { hashearClave, verificarClave } from "../../lib/claves.js";
 import { conflicto, HttpError, noEncontrado } from "../../lib/errores.js";
 import { firmarToken } from "../../middleware/auth.js";
-import type { ingreso, registro } from "./esquemas.js";
+import type { actualizarCuenta, cambiarClave, ingreso, registro } from "./esquemas.js";
 
 type Usuario = typeof usuarios.$inferSelect;
 
@@ -41,4 +41,44 @@ export async function obtenerYo(db: Db, id: string) {
   const [usuario] = await db.select().from(usuarios).where(eq(usuarios.id, id));
   if (!usuario) throw noEncontrado("La cuenta");
   return usuarioPublico(usuario);
+}
+
+export async function actualizarYo(db: Db, id: string, datos: z.infer<typeof actualizarCuenta>) {
+  const [usuario] = await db.select().from(usuarios).where(eq(usuarios.id, id));
+  if (!usuario) throw noEncontrado("La cuenta");
+
+  const cambios: Partial<typeof usuarios.$inferInsert> = {};
+  if (datos.nombre !== undefined) cambios.nombre = datos.nombre;
+
+  if (datos.email !== undefined && datos.email !== usuario.email) {
+    if (!datos.claveActual || !(await verificarClave(datos.claveActual, usuario.passwordHash))) {
+      throw new HttpError(401, "credenciales_invalidas", "Escribe tu contraseña actual para cambiar el correo");
+    }
+    const [otro] = await db.select({ id: usuarios.id }).from(usuarios).where(eq(usuarios.email, datos.email));
+    if (otro && otro.id !== id) {
+      throw conflicto("Ya existe otra cuenta con ese correo");
+    }
+    cambios.email = datos.email;
+  }
+
+  if (Object.keys(cambios).length === 0) return usuarioPublico(usuario);
+
+  const [actualizado] = await db.update(usuarios).set(cambios).where(eq(usuarios.id, id)).returning();
+  return usuarioPublico(actualizado);
+}
+
+export async function actualizarClave(db: Db, id: string, datos: z.infer<typeof cambiarClave>) {
+  const [usuario] = await db.select().from(usuarios).where(eq(usuarios.id, id));
+  if (!usuario) throw noEncontrado("La cuenta");
+
+  if (!(await verificarClave(datos.claveActual, usuario.passwordHash))) {
+    throw new HttpError(401, "credenciales_invalidas", "Tu contraseña actual no coincide");
+  }
+
+  await db
+    .update(usuarios)
+    .set({ passwordHash: await hashearClave(datos.claveNueva) })
+    .where(eq(usuarios.id, id));
+
+  return { ok: true };
 }

@@ -14,3 +14,18 @@ export const ingreso = z.object({
   email,
   clave: z.string().min(1, "Escribe tu contraseña").max(200),
 });
+
+export const actualizarCuenta = z
+  .object({
+    nombre: z.string().trim().min(2, "Escribe tu nombre").max(80).optional(),
+    email: email.optional(),
+    claveActual: z.string().min(1, "Escribe tu contraseña actual").max(200).optional(),
+  })
+  .refine((d) => d.nombre !== undefined || d.email !== undefined, {
+    message: "No hay cambios que guardar",
+  });
+
+export const cambiarClave = z.object({
+  claveActual: z.string().min(1, "Escribe tu contraseña actual").max(200),
+  claveNueva: z.string().min(8, "La contraseña nueva debe tener al menos 8 caracteres").max(200),
+});
