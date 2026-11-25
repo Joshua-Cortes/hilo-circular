@@ -10,6 +10,8 @@ Hilo Circular es una plataforma web de economía circular textil para La Serena 
 
 La idea completa, en una página: **[docs/00-la-idea.md](docs/00-la-idea.md)**.
 
+**Pruébala en línea: https://hilo-circular-cn33.onrender.com**. Para entrar sin registrarte usa la cuenta demo `demo@hilocircular.cl` / `hilo2026`. Las otras cuentas demo (oficio y fundación) están en [Cómo levantar el proyecto](#cómo-levantar-el-proyecto). La versión en línea corresponde a la rama `main` y se actualiza sola en unos 5 minutos después de cada merge.
+
 En 2021 llegaron a Chile cerca de 156 mil toneladas de ropa usada y alrededor del 60 % terminó en el desierto de Atacama (CEPAL, datos preliminares). Cada prenda reparada o donada es una prenda menos en el desierto.
 
 > Proyecto de la asignatura **Informática y Sociedad**, Universidad de La Serena, 2026.
