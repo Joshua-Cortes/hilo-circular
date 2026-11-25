@@ -10,9 +10,18 @@ import {
   real,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { CATEGORIAS_SERVICIO, ESTADOS_DONACION, PRECISIONES_UBICACION, ROLES, TIPOS_PRENDA } from "../lib/catalogo.js";
+import {
+  CATEGORIAS_SERVICIO,
+  CONDICIONES_PRENDA,
+  ESTADOS_DONACION,
+  ESTADOS_PUBLICACION,
+  PRECISIONES_UBICACION,
+  ROLES,
+  TIPOS_PRENDA,
+} from "../lib/catalogo.js";
 
 export const rolEnum = pgEnum("rol", ROLES);
 export const categoriaServicioEnum = pgEnum("categoria_servicio", CATEGORIAS_SERVICIO);
@@ -20,6 +29,8 @@ export const tipoPrendaEnum = pgEnum("tipo_prenda", TIPOS_PRENDA);
 export const precisionUbicacionEnum = pgEnum("precision_ubicacion", PRECISIONES_UBICACION);
 export const estadoDonacionEnum = pgEnum("estado_donacion", ESTADOS_DONACION);
 export const canalContactoEnum = pgEnum("canal_contacto", ["whatsapp", "telefono"]);
+export const condicionPrendaEnum = pgEnum("condicion_prenda", CONDICIONES_PRENDA);
+export const estadoPublicacionEnum = pgEnum("estado_publicacion", ESTADOS_PUBLICACION);
 
 const timestamps = {
   creadoEn: timestamp("creado_en", { withTimezone: true }).notNull().defaultNow(),
@@ -142,6 +153,91 @@ export const contactos = pgTable(
     creadoEn: timestamp("creado_en", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("contactos_oficio_idx").on(t.oficioId)],
+);
+
+/** Prenda publicada en el mercado de segunda mano. No hay pasarela de pago: se acuerda por chat o WhatsApp. */
+export const publicaciones = pgTable(
+  "publicaciones",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    vendedorId: uuid("vendedor_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    titulo: text("titulo").notNull(),
+    descripcion: text("descripcion").notNull().default(""),
+    prenda: tipoPrendaEnum("prenda").notNull(),
+    /** Texto libre: "M", "38", "10 años". */
+    talla: text("talla").notNull(),
+    condicion: condicionPrendaEnum("condicion").notNull(),
+    /** Pesos chilenos. 0 = se regala. */
+    precio: integer("precio").notNull(),
+    comuna: text("comuna").notNull(),
+    /** Opcional: si no hay WhatsApp, el contacto es solo por el chat de la plataforma. */
+    whatsapp: text("whatsapp"),
+    estado: estadoPublicacionEnum("estado").notNull().default("disponible"),
+    ...timestamps,
+  },
+  (t) => [index("publicaciones_vendedor_idx").on(t.vendedorId), index("publicaciones_estado_idx").on(t.estado)],
+);
+
+/**
+ * Fotos de una publicación, en base64. Van en su propia tabla para que los listados no las arrastren
+ * y se sirven como imagen desde GET /api/mercado/fotos/:id. Así el despliegue no necesita un bucket.
+ */
+export const fotosPublicacion = pgTable(
+  "fotos_publicacion",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicacionId: uuid("publicacion_id")
+      .notNull()
+      .references(() => publicaciones.id, { onDelete: "cascade" }),
+    orden: integer("orden").notNull(),
+    mime: text("mime").notNull(),
+    datos: text("datos").notNull(),
+  },
+  (t) => [index("fotos_publicacion_idx").on(t.publicacionId)],
+);
+
+/** Una conversación por comprador y publicación. */
+export const conversaciones = pgTable(
+  "conversaciones",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicacionId: uuid("publicacion_id")
+      .notNull()
+      .references(() => publicaciones.id, { onDelete: "cascade" }),
+    compradorId: uuid("comprador_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    vendedorId: uuid("vendedor_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    creadoEn: timestamp("creado_en", { withTimezone: true }).notNull().defaultNow(),
+    /** Fecha del último mensaje: ordena la bandeja de entrada. */
+    ultimoMensajeEn: timestamp("ultimo_mensaje_en", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("conversaciones_publicacion_comprador_idx").on(t.publicacionId, t.compradorId),
+    index("conversaciones_comprador_idx").on(t.compradorId),
+    index("conversaciones_vendedor_idx").on(t.vendedorId),
+  ],
+);
+
+export const mensajes = pgTable(
+  "mensajes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    conversacionId: uuid("conversacion_id")
+      .notNull()
+      .references(() => conversaciones.id, { onDelete: "cascade" }),
+    autorId: uuid("autor_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    texto: text("texto").notNull(),
+    leidoEn: timestamp("leido_en", { withTimezone: true }),
+    creadoEn: timestamp("creado_en", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("mensajes_conversacion_idx").on(t.conversacionId, t.creadoEn)],
 );
 
 export const oficiosRelations = relations(oficios, ({ many, one }) => ({

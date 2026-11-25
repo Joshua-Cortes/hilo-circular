@@ -1,6 +1,22 @@
-import { count } from "drizzle-orm";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { and, count, eq } from "drizzle-orm";
+import { estimarKg, type Rol } from "../lib/catalogo.js";
+import { hashearClave } from "../lib/claves.js";
 import type { Db } from "./client.js";
-import { fundaciones, type Horario, oficios, servicios, usuarios } from "./schema.js";
+import {
+  conversaciones,
+  donaciones,
+  fotosPublicacion,
+  fundaciones,
+  type Horario,
+  mensajes,
+  oficios,
+  publicaciones,
+  servicios,
+  usuarios,
+} from "./schema.js";
 
 /**
  * Datos de DEMOSTRACIÓN. Nombres, teléfonos y horarios son ficticios; las coordenadas caen en
@@ -119,6 +135,37 @@ const OFICIOS_DEMO = [
       },
     ],
   },
+  {
+    // Correo ficticio a propósito: la clave demo es pública (README) y estos datos se cargan en producción.
+    emailCuenta: "airclean@demo.hilocircular.cl",
+    nombreCuenta: "Bastián Pizarro · AirClean",
+    conAccesoClaveDemo: true,
+    nombrePublico: "AirClean · Restauración de Calzado",
+    descripcion:
+      "Limpieza profunda de zapatillas, restauración de calzado, blanqueamiento de suelas y recuperación de color en jockeys y gorras en La Serena.",
+    comuna: "La Serena",
+    lat: -29.9085,
+    lng: -71.2465,
+    precisionUbicacion: "aproximada" as const,
+    whatsapp: "56900000006",
+    verificado: true,
+    servicios: [
+      {
+        categoria: "zapateria" as const,
+        titulo: "Limpieza profunda y restauración de calzado",
+        descripcion: "Limpieza completa interior y exterior, desinfección, gamuza y blanqueamiento de entresuela.",
+        prendas: ["calzado" as const],
+        precioDesde: 12000,
+      },
+      {
+        categoria: "marroquineria" as const,
+        titulo: "Restauración y teñido de jockeys y accesorios",
+        descripcion: "Recuperación de color, teñido y limpieza profunda de gorras, bolsos y mochilas.",
+        prendas: ["bolso_cartera" as const, "calzado" as const],
+        precioDesde: 10000,
+      },
+    ],
+  },
 ];
 
 const FUNDACIONES_DEMO = [
@@ -179,42 +226,466 @@ const FUNDACIONES_DEMO = [
     aceptaDanada: false,
     verificado: true,
   },
+  {
+    nombre: "Contenedor Textil Avenida del Mar (demo)",
+    descripcion: "Contenedor de recepción abierto todos los días junto al sector de playas.",
+    comuna: "La Serena",
+    direccion: "Avenida del Mar, ubicación ficticia",
+    lat: -29.9172,
+    lng: -71.2688,
+    horarios: horarioHabil("08:00", "21:00", [0, 1, 2, 3, 4, 5, 6]),
+    prendasAceptadas: [],
+    necesidadesActuales: "",
+    aceptaDanada: true,
+    verificado: true,
+  },
+  {
+    nombre: "Centro Comunitario La Florida (demo)",
+    descripcion: "Arma ajuares para familias que llegan al sector oriente de La Serena.",
+    comuna: "La Serena",
+    direccion: "Sede ficticia, La Florida",
+    lat: -29.9302,
+    lng: -71.2268,
+    horarios: horarioHabil("15:00", "19:00", [1, 2, 3, 4]),
+    prendasAceptadas: ["ropa_infantil" as const, "ropa_de_cama" as const, "polera_camisa" as const],
+    necesidadesActuales: "Ropa de bebé de 0 a 12 meses y sábanas de una plaza.",
+    aceptaDanada: false,
+    verificado: true,
+  },
+  {
+    nombre: "Junta Vecinal San Joaquín (demo)",
+    descripcion: "Recolecta abrigo para adultos mayores del barrio.",
+    comuna: "La Serena",
+    direccion: "Sede vecinal ficticia, San Joaquín",
+    lat: -29.9216,
+    lng: -71.2449,
+    horarios: horarioHabil("10:00", "12:30", [2, 4, 6]),
+    prendasAceptadas: ["chaqueta_abrigo" as const, "sweater" as const, "pantalon" as const, "calzado" as const],
+    necesidadesActuales: "Parkas y zapatos de adulto mayor, tallas 38 a 42.",
+    aceptaDanada: false,
+    verificado: false,
+  },
+  {
+    nombre: "Ropero Escolar Tierras Blancas (demo)",
+    descripcion: "Presta uniformes a estudiantes de básica y media durante el año escolar.",
+    comuna: "Coquimbo",
+    direccion: "Escuela ficticia, Tierras Blancas",
+    lat: -29.9712,
+    lng: -71.3065,
+    horarios: horarioHabil("08:30", "13:00"),
+    prendasAceptadas: ["uniforme_escolar" as const, "calzado" as const, "ropa_infantil" as const],
+    necesidadesActuales: "Poleras piqué y buzos escolares tallas 8 a 14.",
+    aceptaDanada: false,
+    verificado: true,
+  },
+  {
+    nombre: "Abrigo Compartido La Herradura (demo)",
+    descripcion: "Grupo de voluntarios que reparte ropa en el sector puerto y La Herradura.",
+    comuna: "Coquimbo",
+    direccion: "Dirección ficticia, La Herradura",
+    lat: -29.9838,
+    lng: -71.3532,
+    horarios: horarioHabil("17:00", "20:00", [1, 3, 5]),
+    prendasAceptadas: [],
+    necesidadesActuales: "Ropa de trabajo y zapatos de seguridad en buen estado.",
+    aceptaDanada: false,
+    verificado: true,
+  },
+  {
+    nombre: "Punto Limpio Sindempart (demo)",
+    descripcion: "Recibe textiles en cualquier estado: lo que no se reutiliza se envía a reciclaje.",
+    comuna: "Coquimbo",
+    direccion: "Punto limpio ficticio, Sindempart",
+    lat: -29.9334,
+    lng: -71.2965,
+    horarios: horarioHabil("09:00", "17:00", [1, 2, 3, 4, 5, 6]),
+    prendasAceptadas: [],
+    necesidadesActuales: "",
+    aceptaDanada: true,
+    verificado: false,
+  },
 ];
 
-/** Inserta los datos demo si la base está vacía. Devuelve false si ya había datos. */
-export async function sembrar(db: Db): Promise<boolean> {
-  const [{ n }] = await db.select({ n: count() }).from(oficios);
-  if (n > 0) return false;
+/**
+ * Cuentas demo CON acceso, para mostrar el proyecto sin registrarse. La contraseña se publica en el
+ * README a propósito: son datos ficticios y no deben existir en producción.
+ */
+export const CLAVE_DEMO = "hilo2026";
+const CUENTAS_DEMO = [
+  { email: "demo@hilocircular.cl", nombre: "Camila (demo)", rol: "persona" as const },
+  { email: "taller@hilocircular.cl", nombre: "Taller de prueba (demo)", rol: "oficio" as const },
+];
 
-  for (const [i, { servicios: serviciosDemo, ...perfil }] of OFICIOS_DEMO.entries()) {
-    const [usuario] = await db
-      .insert(usuarios)
-      .values({
-        email: `oficio${i + 1}@demo.hilocircular.cl`,
-        passwordHash: SIN_ACCESO,
-        nombre: perfil.nombrePublico,
-        rol: "oficio",
-      })
+const VENDEDORES_DEMO = ["Valentina (demo)", "Matías (demo)", "Javiera (demo)"];
+
+type PublicacionDemo = Omit<typeof publicaciones.$inferInsert, "vendedorId"> & {
+  vendedor: number;
+  fotoArchivo?: string;
+};
+
+/** vendedor: índice en VENDEDORES_DEMO; -1 = la cuenta demo@hilocircular.cl. */
+const PUBLICACIONES_DEMO: PublicacionDemo[] = [
+  {
+    vendedor: 0,
+    fotoArchivo: "parka.jpg",
+    titulo: "Parka acolchada azul marino",
+    descripcion: "La usé un invierno. Abriga harto y tiene capucha desmontable. Sin manchas ni roturas.",
+    prenda: "chaqueta_abrigo",
+    talla: "M",
+    condicion: "como_nueva",
+    precio: 18000,
+    comuna: "La Serena",
+    whatsapp: "56911111111",
+  },
+  {
+    vendedor: 1,
+    fotoArchivo: "jeans.jpg",
+    titulo: "Jeans tiro alto celeste",
+    descripcion: "Corte recto, me quedaron grandes. Se pueden probar en el centro de Coquimbo.",
+    prenda: "pantalon",
+    talla: "38",
+    condicion: "buen_estado",
+    precio: 7000,
+    comuna: "Coquimbo",
+    whatsapp: "56922222222",
+  },
+  {
+    vendedor: 2,
+    fotoArchivo: "uniforme.jpg",
+    titulo: "Uniforme escolar completo",
+    descripcion: "Falda, polera piqué y polerón. Mi hija ya pasó a media; lo regalo a quien lo necesite.",
+    prenda: "uniforme_escolar",
+    talla: "12 años",
+    condicion: "buen_estado",
+    precio: 0,
+    comuna: "La Serena",
+    whatsapp: null,
+  },
+  {
+    vendedor: 0,
+    fotoArchivo: "zapatillas.jpg",
+    titulo: "Zapatillas de running blancas",
+    descripcion: "Usadas tres veces, me quedaron chicas. Incluyen la caja.",
+    prenda: "calzado",
+    talla: "40",
+    condicion: "como_nueva",
+    precio: 15000,
+    comuna: "La Serena",
+    whatsapp: "56911111111",
+  },
+  {
+    vendedor: 1,
+    fotoArchivo: "vestido.jpg",
+    titulo: "Vestido de lino verde oliva",
+    descripcion: "Nuevo, todavía con etiqueta. Ideal para el verano.",
+    prenda: "falda_vestido",
+    talla: "S",
+    condicion: "nueva_con_etiqueta",
+    precio: 14000,
+    comuna: "Coquimbo",
+    whatsapp: "56922222222",
+  },
+  {
+    vendedor: 2,
+    fotoArchivo: "sweater.jpg",
+    titulo: "Sweater de lana tejido a mano",
+    descripcion: "Tejido por mi abuela, lana gruesa color crudo.",
+    prenda: "sweater",
+    talla: "L",
+    condicion: "buen_estado",
+    precio: 9000,
+    comuna: "La Serena",
+    whatsapp: null,
+  },
+  {
+    vendedor: 0,
+    fotoArchivo: "bebe.jpg",
+    titulo: "Lote de ropa de bebé (8 prendas)",
+    descripcion: "Bodies, piluchos y dos pantalones, de 6 a 12 meses. Todo lavado.",
+    prenda: "ropa_infantil",
+    talla: "6-12 meses",
+    condicion: "buen_estado",
+    precio: 10000,
+    comuna: "Coquimbo",
+    whatsapp: "56911111111",
+  },
+  {
+    vendedor: 1,
+    fotoArchivo: "cartera.jpg",
+    titulo: "Cartera de cuero café",
+    descripcion: "Tiene un roce en una esquina (sale en la descripción para que no haya sorpresas).",
+    prenda: "bolso_cartera",
+    talla: "Única",
+    condicion: "con_detalles",
+    precio: 8000,
+    comuna: "La Serena",
+    whatsapp: "56922222222",
+  },
+  {
+    vendedor: -1,
+    fotoArchivo: "camisa.jpg",
+    titulo: "Camisa de mezclilla oversize",
+    descripcion: "Muy poco uso. Puedo entregarla en la ULS.",
+    prenda: "polera_camisa",
+    talla: "L",
+    condicion: "como_nueva",
+    precio: 6500,
+    comuna: "La Serena",
+    whatsapp: null,
+  },
+  {
+    vendedor: 2,
+    titulo: "Chaqueta de cuero negra",
+    descripcion: "Ya encontró nueva dueña.",
+    prenda: "chaqueta_abrigo",
+    talla: "M",
+    condicion: "buen_estado",
+    precio: 25000,
+    comuna: "Coquimbo",
+    whatsapp: null,
+    estado: "vendida",
+  },
+];
+
+async function cuentaDemo(db: Db, datos: { email: string; nombre: string; rol: Rol }, passwordHash: string) {
+  const [existente] = await db.select().from(usuarios).where(eq(usuarios.email, datos.email));
+  if (existente) return existente;
+  const [usuario] = await db
+    .insert(usuarios)
+    .values({ ...datos, passwordHash })
+    .returning();
+  return usuario;
+}
+
+/**
+ * Inserta los datos demo que falten. Cada bloque se revisa por separado, así una base creada antes
+ * de que existiera el mercado recibe solo lo nuevo. Devuelve false si no había nada que agregar.
+ */
+export async function sembrar(db: Db): Promise<boolean> {
+  let sembro = false;
+
+  if (await sembrarOficios(db)) {
+    sembro = true;
+  }
+
+  const existentes = new Set((await db.select({ nombre: fundaciones.nombre }).from(fundaciones)).map((f) => f.nombre));
+  for (const [i, fundacion] of FUNDACIONES_DEMO.entries()) {
+    if (existentes.has(fundacion.nombre)) continue;
+    const usuario = await cuentaDemo(
+      db,
+      { email: `fundacion${i + 1}@demo.hilocircular.cl`, nombre: fundacion.nombre, rol: "fundacion" },
+      SIN_ACCESO,
+    );
+    await db.insert(fundaciones).values({ ...fundacion, usuarioId: usuario.id });
+    sembro = true;
+  }
+
+  const [{ n: totalPublicaciones }] = await db.select({ n: count() }).from(publicaciones);
+  if (totalPublicaciones === 0) {
+    await sembrarMercado(db);
+    sembro = true;
+  }
+
+  if (await sembrarFotosMercado(db)) {
+    sembro = true;
+  }
+
+  if (await sembrarFundacionDemo(db)) {
+    sembro = true;
+  }
+
+  return sembro;
+}
+
+/** Fundación con acceso para probar el panel (CU5): administra el Ropero Solidario de Las Compañías. */
+const FUNDACION_DEMO = {
+  email: "fundacion@hilocircular.cl",
+  nombre: "Ropero Solidario (demo)",
+  rol: "fundacion" as const,
+};
+const NOMBRE_FUNDACION_DEMO = "Ropero Solidario Las Compañías (demo)";
+
+/**
+ * Le da a la fundación demo una cuenta con la clave publicada y algunas donaciones de la cuenta
+ * demo@hilocircular.cl: dos por confirmar (para mostrar el flujo en vivo) y una ya recibida.
+ */
+async function sembrarFundacionDemo(db: Db): Promise<boolean> {
+  const [fundacion] = await db.select().from(fundaciones).where(eq(fundaciones.nombre, NOMBRE_FUNDACION_DEMO));
+  const [persona] = await db.select().from(usuarios).where(eq(usuarios.email, CUENTAS_DEMO[0].email));
+  if (!fundacion || !persona) return false;
+
+  const [existente] = await db.select().from(usuarios).where(eq(usuarios.email, FUNDACION_DEMO.email));
+  if (existente && fundacion.usuarioId === existente.id) return false;
+
+  const cuenta = existente ?? (await cuentaDemo(db, FUNDACION_DEMO, await hashearClave(CLAVE_DEMO)));
+  await db.update(fundaciones).set({ usuarioId: cuenta.id }).where(eq(fundaciones.id, fundacion.id));
+
+  const [{ n }] = await db
+    .select({ n: count() })
+    .from(donaciones)
+    .where(and(eq(donaciones.fundacionId, fundacion.id), eq(donaciones.donanteId, persona.id)));
+  if (n > 0) return true;
+
+  const ahora = Date.now();
+  const dias = (d: number) => new Date(ahora - d * 24 * 60 * 60 * 1000);
+  const ejemplos = [
+    {
+      items: [{ prenda: "uniforme_escolar" as const, cantidad: 3, estado: "buen_estado" as const }],
+      creadoEn: dias(1),
+    },
+    {
+      items: [
+        { prenda: "chaqueta_abrigo" as const, cantidad: 1, estado: "buen_estado" as const },
+        { prenda: "calzado" as const, cantidad: 2, estado: "buen_estado" as const },
+      ],
+      creadoEn: dias(0.2),
+    },
+    {
+      items: [{ prenda: "ropa_infantil" as const, cantidad: 6, estado: "buen_estado" as const }],
+      creadoEn: dias(6),
+      estado: "recibida" as const,
+      recibidaEn: dias(5),
+    },
+  ];
+  await db.insert(donaciones).values(
+    ejemplos.map(({ items, ...resto }) => ({
+      fundacionId: fundacion.id,
+      donanteId: persona.id,
+      items,
+      totalPrendas: items.reduce((total, item) => total + item.cantidad, 0),
+      kgEstimados: estimarKg(items),
+      ...resto,
+    })),
+  );
+  return true;
+}
+
+const DIRECTORIO_ACTUAL = dirname(fileURLToPath(import.meta.url));
+
+function leerFotoDemo(archivo: string): string | null {
+  const rutas = [
+    resolve(DIRECTORIO_ACTUAL, "fotos-demo", archivo),
+    resolve(DIRECTORIO_ACTUAL, "../../src/db/fotos-demo", archivo),
+  ];
+  for (const ruta of rutas) {
+    if (existsSync(ruta)) {
+      return readFileSync(ruta).toString("base64");
+    }
+  }
+  return null;
+}
+
+async function sembrarFotosMercado(db: Db): Promise<boolean> {
+  const existentes = await db.select({ id: publicaciones.id, titulo: publicaciones.titulo }).from(publicaciones);
+  const conFoto = new Set(
+    (await db.select({ id: fotosPublicacion.publicacionId }).from(fotosPublicacion)).map((f) => f.id),
+  );
+  const fotosPorTitulo = new Map(
+    PUBLICACIONES_DEMO.filter((p) => p.fotoArchivo).map((p) => [p.titulo, p.fotoArchivo as string]),
+  );
+
+  let agregadas = false;
+  for (const pub of existentes) {
+    if (conFoto.has(pub.id)) continue;
+    const archivo = fotosPorTitulo.get(pub.titulo);
+    if (!archivo) continue;
+    const datos = leerFotoDemo(archivo);
+    if (!datos) continue;
+    await db.insert(fotosPublicacion).values({
+      publicacionId: pub.id,
+      orden: 0,
+      mime: "image/jpeg",
+      datos,
+    });
+    agregadas = true;
+  }
+  return agregadas;
+}
+
+async function sembrarMercado(db: Db) {
+  const hashDemo = await hashearClave(CLAVE_DEMO);
+  const [demo] = await Promise.all(CUENTAS_DEMO.map((cuenta) => cuentaDemo(db, cuenta, hashDemo)));
+  const vendedores = [];
+  for (const [i, nombre] of VENDEDORES_DEMO.entries()) {
+    vendedores.push(
+      await cuentaDemo(db, { email: `vendedor${i + 1}@demo.hilocircular.cl`, nombre, rol: "persona" }, SIN_ACCESO),
+    );
+  }
+
+  const ahora = Date.now();
+  const creadas = [];
+  for (const [i, { vendedor, fotoArchivo: _foto, ...publicacion }] of PUBLICACIONES_DEMO.entries()) {
+    // Fechas escalonadas para que "más recientes" tenga un orden creíble.
+    const creadoEn = new Date(ahora - (i + 1) * 5 * 60 * 60 * 1000);
+    const [fila] = await db
+      .insert(publicaciones)
+      .values({ ...publicacion, vendedorId: vendedor === -1 ? demo.id : vendedores[vendedor].id, creadoEn })
       .returning();
+    creadas.push(fila);
+  }
+
+  // Una conversación iniciada, para que el chat de la cuenta demo no parta vacío.
+  const parka = creadas[0];
+  const [conversacion] = await db
+    .insert(conversaciones)
+    .values({ publicacionId: parka.id, compradorId: demo.id, vendedorId: parka.vendedorId })
+    .returning();
+  const hace = (minutos: number) => new Date(ahora - minutos * 60 * 1000);
+  await db.insert(mensajes).values([
+    {
+      conversacionId: conversacion.id,
+      autorId: demo.id,
+      texto: "Hola! ¿La parka sigue disponible?",
+      creadoEn: hace(50),
+      leidoEn: hace(45),
+    },
+    {
+      conversacionId: conversacion.id,
+      autorId: parka.vendedorId,
+      texto: "Hola Camila, sí. Puedo mostrártela mañana en la tarde cerca de la Plaza de Armas.",
+      creadoEn: hace(40),
+    },
+  ]);
+  await db
+    .update(conversaciones)
+    .set({ ultimoMensajeEn: hace(40) })
+    .where(eq(conversaciones.id, conversacion.id));
+}
+
+async function sembrarOficios(db: Db): Promise<boolean> {
+  const existentes = new Set((await db.select({ nombre: oficios.nombrePublico }).from(oficios)).map((o) => o.nombre));
+  let agregados = false;
+  let hashDemo: string | null = null;
+
+  for (const [i, item] of OFICIOS_DEMO.entries()) {
+    if (existentes.has(item.nombrePublico)) continue;
+    const {
+      servicios: serviciosDemo,
+      emailCuenta,
+      nombreCuenta,
+      conAccesoClaveDemo,
+      ...perfil
+    } = item as (typeof OFICIOS_DEMO)[number] & {
+      emailCuenta?: string;
+      nombreCuenta?: string;
+      conAccesoClaveDemo?: boolean;
+    };
+
+    const email = emailCuenta ?? `oficio${i + 1}@demo.hilocircular.cl`;
+    const nombre = nombreCuenta ?? perfil.nombrePublico;
+    let passwordHash = SIN_ACCESO;
+    if (conAccesoClaveDemo) {
+      hashDemo ??= await hashearClave(CLAVE_DEMO);
+      passwordHash = hashDemo;
+    }
+
+    const usuario = await cuentaDemo(db, { email, nombre, rol: "oficio" }, passwordHash);
     const [oficio] = await db
       .insert(oficios)
       .values({ ...perfil, usuarioId: usuario.id })
       .returning();
     await db.insert(servicios).values(serviciosDemo.map((s) => ({ ...s, oficioId: oficio.id })));
+    agregados = true;
   }
-
-  for (const [i, fundacion] of FUNDACIONES_DEMO.entries()) {
-    const [usuario] = await db
-      .insert(usuarios)
-      .values({
-        email: `fundacion${i + 1}@demo.hilocircular.cl`,
-        passwordHash: SIN_ACCESO,
-        nombre: fundacion.nombre,
-        rol: "fundacion",
-      })
-      .returning();
-    await db.insert(fundaciones).values({ ...fundacion, usuarioId: usuario.id });
-  }
-
-  return true;
+  return agregados;
 }

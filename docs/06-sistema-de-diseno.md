@@ -1,75 +1,82 @@
 # Sistema de diseño
 
-> Construido con la skill **UI/UX Pro Max** a partir de la identidad del Hito 1: fondo crema, verde bosque, terracota y titulares con serifa.
+> Construido con la skill **UI/UX Pro Max** y tomando como referencia el estilo *bento* de sitios de tecnología climática: grilla de tarjetas de distintos tamaños, mucho aire y un solo color de acción.
 
 ## Dirección
 
-La identidad es **artesanal, cálida y legible**, como un taller de barrio, no como una startup. Descartamos la recomendación automática de la herramienta (verde esmeralda, naranja e Inter), porque es la estética genérica que comparten miles de sitios. En su lugar mantuvimos la paleta del Hito 1 y la validamos con estas reglas de la skill:
+**Reciclaje, no startup genérica.** Descartamos la propuesta automática de la herramienta (brutalismo con azul) y armamos una paleta propia a partir de materiales reciclados: menta de fondo, verde hoja como color de acción, cartón *kraft* y un lima de acento para lo que tiene que saltar a la vista.
 
-- **Accesibilidad (prioridad 1):** contraste mínimo 4.5:1, foco visible y navegación por teclado.
-- **Interacción táctil (prioridad 2):** objetivos de al menos 48 px, con 8 px o más de separación.
-- **Estilo:** íconos SVG (Lucide), nunca emojis, y consistencia entre pantallas.
-- **Tipografía:** base de 16 px o más e interlineado de al menos 1.5.
+- **Grilla bento:** cada camino (Reparar, Donar, Mercado) es una tarjeta grande; los datos del problema son tarjetas chicas. Sin bordes: el color de fondo separa.
+- **Titulares con una palabra en cursiva verde** ("Tu ropa merece *otra vuelta*"), como una firma a mano. Es la utilidad `acento`.
+- **Accesibilidad (prioridad 1):** contraste ≥ 4.5:1, foco visible, navegación por teclado y objetivos táctiles de 44 a 48 px.
 
 ## Motivo gráfico: la puntada
 
-Una línea punteada, como una costura, separa secciones y acompaña al logo. El logo es un círculo cosido con una cuenta terracota: un hilo que da la vuelta, que es la economía circular. En el código es la utilidad `puntada`, y se usa `border-dashed` en los separadores.
+Una línea punteada, como una costura. El logo es un hilo punteado que da la vuelta alrededor de un botón: la economía circular. En el inicio, las cifras del problema llevan un anillo cosido. En el código son las utilidades `puntada` y el SVG `Anillo`.
 
 ## Color
 
-Los tokens se definen en [`apps/web/src/estilos.css`](../apps/web/src/estilos.css) y se usan como clases de Tailwind, por ejemplo `bg-crema` o `text-terracota-tinta`.
+Los tokens se definen en [`apps/web/src/estilos.css`](../apps/web/src/estilos.css) y se usan como clases de Tailwind, por ejemplo `bg-menta` o `text-hoja-oscura`.
 
 | Token | Hex | Uso |
 |---|---|---|
-| `crema` | `#F4EFE6` | Fondo general |
-| `papel` | `#FBF8F2` | Tarjetas y superficies elevadas |
-| `bosque` | `#1E3329` | Texto principal, encabezados, pie de página |
-| `tinta-suave` | `#545B52` | Texto secundario |
-| `terracota` | `#B4552F` | Botón primario (con texto blanco), íconos, acentos grandes |
-| `terracota-tinta` | `#9A4528` | Texto de acento en tamaño normal |
-| `terracota-claro` | `#E9B79F` | Detalles sobre fondo bosque |
-| `salvia` | `#3D6852` | Estados positivos y énfasis secundario |
-| `salvia-claro` | `#DCE6DD` | Fondos de estado y hover |
-| `borde` | `#D9CFBF` | Bordes decorativos |
-| `borde-fuerte` | `#8C8273` | Bordes de campos de formulario (≥ 3:1) |
+| `fondo` | `#EEF5EF` | Fondo general (menta muy clara) |
+| `superficie` | `#FFFFFF` | Tarjetas bento y campos |
+| `tinta` | `#12302A` | Texto principal; tarjeta oscura de "Donar"; pie de página |
+| `tinta-suave` | `#4B5F57` | Texto secundario |
+| `hoja` | `#1E8449` | Botón primario (texto blanco), marcadores del mapa, palabra en cursiva de los titulares |
+| `hoja-oscura` | `#166536` | Texto verde en tamaño normal |
+| `menta` / `menta-clara` | `#C9EBD3` / `#E2F2E6` | Tarjeta de "Reparar", estados seleccionados, hover |
+| `kraft` / `kraft-clara` | `#D8BF93` / `#F2E8D5` | Cartón reciclado: avisos, estados vacíos, reciclaje textil |
+| `kraft-tinta` | `#6E5020` | Texto sobre kraft; marcador de reciclaje |
+| `lima` | `#C5EE5C` | Acento: "Publicar", "¡Pasa el filtro!", insignia de verificado |
+| `borde` / `borde-fuerte` | `#D3E2D7` / `#7C9086` | Bordes decorativos / bordes de componentes (≥ 3:1) |
+| `alerta` / `alerta-clara` | `#B03A22` / `#F8E1DA` | Errores |
 
 ### Contraste verificado (WCAG 2.2)
 
 | Combinación | Razón | Resultado |
 |---|---|---|
-| bosque sobre crema | 11.75 : 1 | AAA |
-| tinta-suave sobre crema | 6.12 : 1 | AA |
-| terracota-tinta sobre crema | 5.63 : 1 | AA |
-| salvia sobre crema | 5.56 : 1 | AA |
-| blanco sobre terracota (botón) | 4.91 : 1 | AA |
-| crema sobre bosque | 11.75 : 1 | AAA |
-| terracota-claro sobre bosque | 7.52 : 1 | AAA |
-| terracota sobre crema | 4.28 : 1 | Solo texto ≥ 24 px o íconos |
-| borde-fuerte sobre crema | 3.30 : 1 | Componentes de interfaz (≥ 3:1) |
+| tinta sobre menta | 11.00 : 1 | AAA |
+| tinta sobre lima | 10.63 : 1 | AAA |
+| fondo sobre tinta (texto claro en tarjeta oscura) | 12.78 : 1 | AAA |
+| tinta-suave sobre fondo | 6.16 : 1 | AA |
+| hoja-oscura sobre fondo | 6.42 : 1 | AA |
+| kraft-tinta sobre kraft-clara | 6.10 : 1 | AA |
+| alerta sobre blanco | 6.04 : 1 | AA |
+| blanco sobre hoja (botón) | 4.72 : 1 | AA |
+| hoja sobre fondo | 4.25 : 1 | Solo texto grande (titulares) o íconos |
+| borde-fuerte sobre blanco | 3.39 : 1 | Componentes de interfaz (≥ 3:1) |
 
 ## Tipografía
 
 | Rol | Fuente | Por qué |
 |---|---|---|
-| Titulares | **Fraunces** (variable, ejes `SOFT` y `opsz`) | Serifa "blanda" con calidez artesanal. Con `SOFT 60` se ve hecha a mano sin perder seriedad |
-| Texto e interfaz | **Atkinson Hyperlegible** | Diseñada por el Braille Institute para personas con baja visión: distingue claramente letras parecidas (I/l/1, O/0). Clave para adultos mayores |
+| Titulares | **Bricolage Grotesque** (variable) | Grotesca con carácter, de trazos algo irregulares: moderna sin verse genérica |
+| Palabra destacada | **Fraunces Italic** | Serifa cursiva que contrasta con la grotesca y da el toque "hecho a mano" |
+| Texto e interfaz | **Atkinson Hyperlegible** | Diseñada por el Braille Institute para baja visión: distingue I/l/1 y O/0. Clave para adultos mayores |
 
 - La base es de **18 px** (`html { font-size: 112.5% }`), con interlineado de 1.55.
 - Los titulares usan `text-balance` para evitar palabras huérfanas.
-- Las fuentes se sirven desde el propio sitio con `@fontsource` (sin Google Fonts): no se comparten datos de visitantes con terceros y la página carga más rápido.
+- Las fuentes se sirven desde el propio sitio con `@fontsource` (sin Google Fonts): no se comparten datos de visitantes con terceros.
 
 ## Componentes base
 
 | Clase | Descripción |
 |---|---|
-| `boton-primario` | Fondo terracota con texto blanco; alto mínimo de 48 px; forma de píldora |
-| `boton-secundario` | Borde bosque de 2 px; al pasar el cursor se rellena |
-| `tarjeta` | Fondo papel, borde suave, radio de 20 px |
-| `puntada` | Línea de costura (motivo de marca) |
+| `bento` | Celda de la grilla: radio de 28 px, sin borde, relleno de 24 a 28 px |
+| `bento-enlace` | Bento que es un enlace completo: se levanta 4 px al pasar el cursor y la flecha gira |
+| `boton-primario` | Píldora verde hoja con texto blanco, alto mínimo de 48 px |
+| `boton-secundario` / `boton-claro` | Borde de tinta / fondo blanco |
+| `campo` | Campo de formulario con borde de 2 px que se vuelve verde al enfocarlo |
+| `etiqueta` | Texto en versalitas con espaciado amplio, sobre los titulares ("01 · Reparar") |
+| `acento` | Palabra en Fraunces cursiva verde dentro de un titular |
+| `ChipFiltro` | Filtro en forma de píldora con `aria-pressed` y ✓ cuando está activo |
+| `FotoPrenda` | Foto de la prenda o, si no tiene, una silueta del tipo de prenda sobre un color de la paleta |
 
 ## Reglas de interacción
 
-1. **Una pregunta por pantalla** en flujos guiados (asistente y donación). Cada flujo indica en qué paso va la persona ("Paso 1 de 3").
+1. **Una pregunta por pantalla** en el asistente; el filtro de calidad de Donar muestra sus cinco preguntas juntas con un contador ("3 de 5"). Cada flujo indica en qué paso va la persona ("Paso 1 de 3").
 2. **Al cambiar de paso, el foco va al título**, para que los lectores de pantalla anuncien la pregunta nueva.
 3. **Las etiquetas siempre son visibles.** Nunca se usa un placeholder como única etiqueta. Los errores aparecen junto al campo y en lenguaje simple.
 4. **Transiciones de 200 a 300 ms** con `ease-hilo`. Se respeta `prefers-reduced-motion`.
@@ -79,10 +86,10 @@ Los tokens se definen en [`apps/web/src/estilos.css`](../apps/web/src/estilos.cs
 
 ## Lista de verificación antes de entregar una pantalla
 
-- [ ] Íconos SVG de Lucide con `aria-hidden` si son decorativos, y botones con texto o `aria-label`.
-- [ ] `cursor-pointer` y estado hover en todo lo que se puede pulsar.
-- [ ] Contraste de texto ≥ 4.5:1, verificado con la tabla anterior.
-- [ ] Foco visible al navegar con Tab.
-- [ ] Objetivos táctiles ≥ 48 px.
-- [ ] Probado a 375 px de ancho.
-- [ ] Se respeta `prefers-reduced-motion`.
+- [x] Íconos SVG de Lucide con `aria-hidden` si son decorativos, y botones con texto o `aria-label`.
+- [x] `cursor-pointer` y estado hover en todo lo que se puede pulsar.
+- [x] Contraste de texto ≥ 4.5:1, verificado con la tabla anterior.
+- [x] Foco visible al navegar con Tab.
+- [x] Objetivos táctiles ≥ 48 px.
+- [x] Probado a 375 px de ancho.
+- [x] Se respeta `prefers-reduced-motion`.

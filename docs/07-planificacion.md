@@ -14,13 +14,17 @@ El control oficial del avance semanal se lleva en los **issues y milestones de G
 | 17–23 nov | Pulido de la interfaz y versión móvil | Pruebas con usuarios reales | Corrección de errores | Versión casi final |
 | 24–26 nov | Documentación final | Preparación de la entrega y la presentación | Video demo final | Entrega final (26 nov) |
 
-## Estado real al 1 de noviembre
+## Estado real al 16 de noviembre
 
 | Semana | Planificado | Real | Desvío |
 |---|---|---|---|
 | 14–19 oct | Hito 1 | Presentación entregada el 15 oct | Al día |
-| 20–26 oct | Mockups y modelo de datos | No se avanzó en esa semana | **Atraso de una semana** |
-| 27 oct–2 nov | Proyecto base | Repositorio, CI, API completa con 44 tests, modelo de datos, base del frontend, mockup de donación y documentación | Se recupera el atraso del backend y se adelantan tareas del 3–9 y del 10–16 nov |
+| 20–26 oct | Mockups y modelo de datos | Recuperado el 2 nov con mockups CU1/CU2/CU3 y modelo ER | Recuperado |
+| 27 oct–2 nov | Proyecto base | Repositorio, CI, API completa, modelo de datos, configuración UI y mockups completos | Al día |
+| 3–9 nov | Módulo 1 | Pantalla `/reparar` (CU1), formulario `/mi-taller` (CU3), autenticación `/ingresar` (CU4) y endpoints listos | Completado |
+| 10–16 nov | Demo integrada | Rediseño bento en 3 caminos: Reparar (`/reparar`, `/mi-taller`), Donar (`/donar` con filtro de calidad + mapa Leaflet) y Mercado (`/mercado`, `/mensajes` con chat interno, 59 tests) | Completado |
+| 17–23 nov | Versión casi final | Pulido responsivo móvil (375–1440 px), mapa de oficio, carga diferida (`React.lazy`) y accesibilidad verificada (#20) | Adelantado |
+| 24–26 nov | Entrega final | Manual breve para oficios y fundaciones (`08-manual-oficios-y-fundaciones.md`) y documentación al día (#23) | Adelantado |
 
 ### Lo que se adelantó (1 nov)
 
@@ -37,3 +41,37 @@ El control oficial del avance semanal se lleva en los **issues y milestones de G
 | 10–16 nov | Formulario de perfil de oficio (CU3); integración | Flujo de donación (CU2) conectado a la API; carga de datos reales | Panel de fundación (CU5) | **Demo integrada (16 nov)** |
 | 17–23 nov | Pulido y versión móvil; accesibilidad | Pruebas con usuarios reales (protocolo y SUS) | Corrección de errores | Versión casi final |
 | 24–26 nov | Documentación final | Preparación de la entrega y la presentación | Video demo | **Entrega final (26 nov)** |
+
+## Planilla sistematizada de control por Issue (#26)
+
+| Issue | Semana / Hito | Actividad | Responsable | Estado | Evidencia / PR |
+|---|---|---|---|---|---|
+| #1 | S1 · 14–19 oct | Requerimientos funcionales y casos de uso | Bastian Pizarro | Completado | `docs/03-casos-de-uso.md` |
+| #2 | S1 · 14–19 oct | Diagrama de arquitectura y elección del stack | Joshua Cortés | Completado | PR #28 · `docs/02-arquitectura.md` |
+| #3 | S1 · 14–19 oct | Redacción de la descripción e impacto social | Hector Marin | Completado | `docs/01-fundamentacion.md` |
+| #4 | S2 · 20–26 oct | Mockups de búsqueda y perfiles de oficios (CU1, CU3) | Bastian Pizarro | Completado | PR #31 · `docs/mockups/oficios.html` |
+| #5 | S2 · 20–26 oct | Mockup de donación con mapa (CU2) | Joshua Cortés | Completado | PR #29 · `docs/mockups/donar.html` |
+| #6 | S2 · 20–26 oct | Modelo de datos (diagrama ER) | Hector Marin | Completado | `docs/04-modelo-de-datos.md` |
+| #7 | S3 · 27 oct–2 nov | Repositorio, ramas e integración continua | Bastian Pizarro | Completado | PR #32 · `apps/web/components.json` |
+| #8 | S3 · 27 oct–2 nov | Estructura base de la API REST (Node.js) | Joshua Cortés | Completado | `apps/api/` |
+| #9 | S3 · 27 oct–2 nov | Esquema de la base de datos (PostgreSQL) | Hector Marin | En curso | `apps/api/src/db/schema.ts` |
+| #10 | Hito 2 · 4 nov | Informe y presentación del Hito 2 (avance 2/3) | Grupal | Completado | Entrega Hito 2 |
+| #11 | S4 · 3–9 nov | Módulo de búsqueda y filtros (CU1, frontend) | Bastian Pizarro | Completado | PR #33 · `Reparar.tsx`, `PerfilOficio.tsx` |
+| #12 | S4 · 3–9 nov | Endpoints de servicios, perfiles y donaciones | Joshua Cortés | Completado | PR #30 · `apps/api/src/modules/` |
+| #13 | S4 · 3–9 nov | Registro, inicio de sesión y roles (CU4) | Joshua Cortés | Completado | PR #37 · `Ingresar.tsx`, `/api/auth` |
+| #14 | S4 · 3–9 nov | Acuerdos con oficios y fundaciones reales del piloto | Grupal | En curso | `docs/09-consentimiento-y-onboarding.md` |
+| #15 | S4 · 3–9 nov | Despliegue de prueba (API + base de datos + web) | Joshua Cortés | Pendiente | — |
+| #16 | S5 · 10–16 nov | Integración frontend-backend y formulario perfil (CU3) | Bastian Pizarro | Completado | PR #34 · `MiTaller.tsx` |
+| #17 | S5 · 10–16 nov | Pruebas automatizadas de los endpoints | Joshua Cortés | Completado | PRs #30 y #37 (59 tests) |
+| #18 | S5 · 10–16 nov | Mapa de donación con Leaflet (CU2) | Joshua Cortés | Completado | PR #37 · `MapaPuntos.tsx` |
+| #19 | S5 · 10–16 nov | Panel de fundación: necesidades y confirmación (CU5) | Hector Marin | Pendiente | — |
+| #20 | S6 · 17–23 nov | Pulido de la interfaz y versión móvil | Bastian Pizarro | Completado | PR #38 · `MapaUbicacionOficio.tsx`, lazy routes |
+| #21 | S6 · 17–23 nov | Pruebas con usuarios reales (protocolo + SUS) | Joshua Cortés | Pendiente | — |
+| #22 | S6 · 17–23 nov | Corrección de errores | Hector Marin | Pendiente | — |
+| #23 | S7 · 24–26 nov | Documentación final | Bastian Pizarro | Completado | PR #39 · `docs/08-manual-oficios-y-fundaciones.md` |
+| #24 | S7 · 24–26 nov | Preparación de la entrega final y la presentación | Joshua Cortés | Pendiente | — |
+| #25 | S7 · 24–26 nov | Video demo final | Hector Marin | Pendiente | — |
+| #26 | S3 · 27 oct–2 nov | Planilla de planificación sistematizada | Grupal | En curso | `docs/07-planificacion.md` |
+| #27 | S5 · 10–16 nov | Flujo de donación conectado a la API (CU2) | Joshua Cortés | Completado | PR #37 · `Donar.tsx` |
+| #35 | S5 · 10–16 nov | Mercado de segunda mano: publicar, comprar y chat | Joshua Cortés | Completado | PR #37 · `Mercado.tsx`, `Mensajes.tsx` |
+| #36 | S5 · 10–16 nov | La idea en una página y documentación por caminos | Joshua Cortés | Completado | PR #37 · `docs/00-la-idea.md` |

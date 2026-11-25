@@ -1,31 +1,42 @@
-import { Construction } from "lucide-react";
-import { Link, Route, Routes } from "react-router";
-import { CifrasImpacto } from "./componentes/CifrasImpacto";
+import { lazy, Suspense, useEffect } from "react";
+import { Link, Route, Routes, useLocation } from "react-router";
+import { EncabezadoPagina } from "./componentes/EncabezadoPagina";
+import { ImpactoPorCamino } from "./componentes/ImpactoPorCamino";
 import { Marco } from "./componentes/Marco";
+import { RequiereSesion } from "./componentes/RequiereSesion";
+import { Ingresar } from "./paginas/Ingresar";
 import { Inicio } from "./paginas/Inicio";
+import { Mercado } from "./paginas/Mercado";
+import { Reparar } from "./paginas/Reparar";
 
-/** Marcador para las pantallas que se construyen en los issues de cada integrante. */
-function EnConstruccion({ titulo, issue, responsable }: { titulo: string; issue: string; responsable: string }) {
-  return (
-    <section className="mx-auto max-w-3xl px-5 py-20">
-      <Construction className="size-10 text-terracota" aria-hidden="true" />
-      <h1 className="mt-4 text-5xl font-semibold">{titulo}</h1>
-      <p className="mt-4 text-xl text-tinta-suave">
-        Esta pantalla está en desarrollo ({issue}, a cargo de {responsable}). La API ya responde en{" "}
-        <code className="rounded bg-salvia-claro px-1.5">/api</code>.
-      </p>
-      <Link to="/" className="boton-secundario mt-8">
-        Volver al inicio
-      </Link>
-    </section>
-  );
-}
+const Donar = lazy(() => import("./paginas/Donar").then((m) => ({ default: m.Donar })));
+const Ajustes = lazy(() => import("./paginas/Ajustes").then((m) => ({ default: m.Ajustes })));
+const PerfilOficio = lazy(() => import("./paginas/PerfilOficio").then((m) => ({ default: m.PerfilOficio })));
+const MiTaller = lazy(() => import("./paginas/MiTaller").then((m) => ({ default: m.MiTaller })));
+const MiFundacion = lazy(() => import("./paginas/MiFundacion").then((m) => ({ default: m.MiFundacion })));
+const DetallePublicacion = lazy(() =>
+  import("./paginas/DetallePublicacion").then((m) => ({ default: m.DetallePublicacion })),
+);
+const Publicar = lazy(() => import("./paginas/Publicar").then((m) => ({ default: m.Publicar })));
+const MisDonaciones = lazy(() => import("./paginas/MisDonaciones").then((m) => ({ default: m.MisDonaciones })));
+const MisPublicaciones = lazy(() =>
+  import("./paginas/MisPublicaciones").then((m) => ({ default: m.MisPublicaciones })),
+);
+const Mensajes = lazy(() => import("./paginas/Mensajes").then((m) => ({ default: m.Mensajes })));
 
 function NoEncontrada() {
   return (
-    <section className="mx-auto max-w-3xl px-5 py-20">
-      <h1 className="text-5xl font-semibold">No encontramos esta página</h1>
-      <p className="mt-4 text-xl text-tinta-suave">Puede que el enlace esté incompleto o que la página ya no exista.</p>
+    <section className="mx-auto max-w-3xl px-4 py-20 md:px-6">
+      <EncabezadoPagina
+        etiqueta="Error 404"
+        titulo={
+          <>
+            Este hilo <em className="acento">se cortó</em>
+          </>
+        }
+      >
+        Puede que el enlace esté incompleto o que la página ya no exista.
+      </EncabezadoPagina>
       <Link to="/" className="boton-primario mt-8">
         Ir al inicio
       </Link>
@@ -35,33 +46,106 @@ function NoEncontrada() {
 
 function PaginaImpacto() {
   return (
-    <section className="mx-auto max-w-6xl px-5 py-16">
-      <h1 className="text-5xl font-semibold">Impacto</h1>
-      <p className="mt-3 max-w-2xl text-xl text-tinta-suave">
-        Indicadores públicos y actualizados de Hilo Circular. Los kilos recuperados se estiman con el peso promedio de
-        cada prenda y solo consideran donaciones confirmadas por la fundación.
-      </p>
-      <CifrasImpacto />
+    <section className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14">
+      <EncabezadoPagina
+        etiqueta="Impacto"
+        titulo={
+          <>
+            Lo que <em className="acento">no llegó</em> al desierto
+          </>
+        }
+      >
+        Indicadores públicos y en vivo, una cifra principal por cada camino. Se calculan con lo que pasa en la
+        plataforma: nadie los escribe a mano.
+      </EncabezadoPagina>
+      <ImpactoPorCamino />
     </section>
   );
+}
+
+/** Al cambiar de página se vuelve arriba, salvo cuando se navega a un ancla (#mapa). */
+function VolverArriba() {
+  const { pathname, hash } = useLocation();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: debe correr justamente cuando cambia la ruta
+  useEffect(() => {
+    if (!hash) window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
 }
 
 export function App() {
   return (
     <Marco>
-      <Routes>
-        <Route path="/" element={<Inicio />} />
-        <Route
-          path="/reparar"
-          element={<EnConstruccion titulo="Reparar" issue="módulo de búsqueda" responsable="Bastian" />}
-        />
-        <Route
-          path="/donar"
-          element={<EnConstruccion titulo="Donar" issue="mapa de donación" responsable="Hector" />}
-        />
-        <Route path="/impacto" element={<PaginaImpacto />} />
-        <Route path="*" element={<NoEncontrada />} />
-      </Routes>
+      <VolverArriba />
+      <Suspense
+        fallback={
+          <div className="mx-auto max-w-7xl px-4 py-12 md:px-6" aria-live="polite">
+            <div className="bento h-64 animate-pulse bg-superficie" aria-hidden="true" />
+            <span className="sr-only">Cargando pantalla…</span>
+          </div>
+        }
+      >
+        <Routes>
+          <Route path="/" element={<Inicio />} />
+          <Route path="/reparar" element={<Reparar />} />
+          <Route path="/reparar/:id" element={<PerfilOficio />} />
+          <Route path="/mi-taller" element={<MiTaller />} />
+          <Route path="/donar" element={<Donar />} />
+          <Route path="/mercado" element={<Mercado />} />
+          <Route
+            path="/mi-fundacion"
+            element={
+              <RequiereSesion>
+                <MiFundacion />
+              </RequiereSesion>
+            }
+          />
+          <Route
+            path="/mercado/publicar"
+            element={
+              <RequiereSesion>
+                <Publicar />
+              </RequiereSesion>
+            }
+          />
+          <Route
+            path="/mercado/mias"
+            element={
+              <RequiereSesion>
+                <MisPublicaciones />
+              </RequiereSesion>
+            }
+          />
+          <Route
+            path="/mis-donaciones"
+            element={
+              <RequiereSesion>
+                <MisDonaciones />
+              </RequiereSesion>
+            }
+          />
+          <Route path="/mercado/:id" element={<DetallePublicacion />} />
+          <Route
+            path="/mensajes/:id?"
+            element={
+              <RequiereSesion>
+                <Mensajes />
+              </RequiereSesion>
+            }
+          />
+          <Route path="/ingresar" element={<Ingresar />} />
+          <Route
+            path="/ajustes"
+            element={
+              <RequiereSesion>
+                <Ajustes />
+              </RequiereSesion>
+            }
+          />
+          <Route path="/impacto" element={<PaginaImpacto />} />
+          <Route path="*" element={<NoEncontrada />} />
+        </Routes>
+      </Suspense>
     </Marco>
   );
 }

@@ -11,6 +11,11 @@ erDiagram
   oficios ||--o{ servicios : "ofrece"
   oficios ||--o{ contactos : "recibe"
   fundaciones ||--o{ donaciones : "recibe"
+  usuarios ||--o{ publicaciones : "vende"
+  publicaciones ||--o{ fotos_publicacion : "tiene"
+  publicaciones ||--o{ conversaciones : "genera"
+  usuarios ||--o{ conversaciones : "compra"
+  conversaciones ||--o{ mensajes : "contiene"
 
   usuarios {
     uuid id PK
@@ -75,9 +80,42 @@ erDiagram
     canal_contacto canal "whatsapp | telefono"
     timestamptz creado_en
   }
+  publicaciones {
+    uuid id PK
+    uuid vendedor_id FK
+    text titulo
+    tipo_prenda prenda
+    text talla "M, 38, 10 años"
+    condicion_prenda condicion "nueva_con_etiqueta | como_nueva | buen_estado | con_detalles"
+    int precio "0 = se regala"
+    text comuna
+    text whatsapp "null = solo chat"
+    estado_publicacion estado "disponible | reservada | vendida"
+  }
+  fotos_publicacion {
+    uuid id PK
+    uuid publicacion_id FK
+    int orden "0 = portada"
+    text mime
+    text datos "base64"
+  }
+  conversaciones {
+    uuid id PK
+    uuid publicacion_id FK
+    uuid comprador_id FK
+    uuid vendedor_id FK
+    timestamptz ultimo_mensaje_en
+  }
+  mensajes {
+    uuid id PK
+    uuid conversacion_id FK
+    uuid autor_id FK
+    text texto
+    timestamptz leido_en "null = sin leer"
+  }
 ```
 
-Todas las tablas, salvo `contactos`, tienen `creado_en` y `actualizado_en`.
+Todas las tablas, salvo `contactos`, `fotos_publicacion`, `conversaciones` y `mensajes`, tienen `creado_en` y `actualizado_en`.
 
 ## Decisiones de modelado
 
@@ -87,6 +125,9 @@ Todas las tablas, salvo `contactos`, tienen `creado_en` y `actualizado_en`.
 - **Las donaciones guardan los ítems como JSONB.** Una donación es un registro inmutable de lo que se entregó y no se consulta ítem por ítem, así que una tabla adicional no aportaba.
 - **`kg_estimados` se calcula al registrar la donación.** Si se recalibran los pesos promedio, las donaciones históricas conservan el valor con que se registraron.
 - **`contactos` es la evidencia de "reparaciones iniciadas".** La reparación ocurre fuera de la plataforma, así que el clic en "Contactar" es el indicador observable más honesto.
+- **Las fotos del mercado van en su propia tabla, en base64.** Así los listados no las arrastran y el despliegue no necesita un servicio de archivos aparte. Cada foto llega reducida a ~1200 px desde el navegador (máx. 700 KB). Si el mercado crece, se mueven a un bucket sin cambiar la API (`/mercado/fotos/:id`).
+- **Una conversación por comprador y prenda** (índice único `publicacion_id + comprador_id`). Guardar también `vendedor_id` evita un *join* para armar la bandeja de entrada.
+- **"Sin leer" es `leido_en IS NULL`.** No hace falta una tabla de estados por participante, porque cada conversación tiene exactamente dos personas.
 - **Coordenadas como `float8`.** No se usa PostGIS, para que el mismo esquema funcione en PGlite (ver decisión D4 en [02-arquitectura.md](02-arquitectura.md)).
 
 ## Cambios al modelo
