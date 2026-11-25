@@ -146,7 +146,12 @@ function Resultado({
   alReiniciar: () => void;
 }) {
   const Icono = ICONO_ACCION[resultado.accion];
-  const destino = `${DESTINO_ACCION[resultado.accion]}?${new URLSearchParams(resultado.filtros)}`;
+  // Para reciclar, Donar se abre directo en modo reciclaje (puntos que reciben textil dañado), sin el filtro de calidad.
+  const filtros =
+    resultado.accion === "reciclar"
+      ? { modo: "reciclar", ...(resultado.filtros.prenda ? { prenda: resultado.filtros.prenda } : {}) }
+      : resultado.filtros;
+  const destino = `${DESTINO_ACCION[resultado.accion]}?${new URLSearchParams(filtros)}`;
   return (
     <div aria-live="polite">
       <div className="mt-6 flex size-14 items-center justify-center rounded-full bg-menta-clara text-hoja-oscura">

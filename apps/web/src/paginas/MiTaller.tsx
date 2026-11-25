@@ -379,11 +379,16 @@ export function MiTaller() {
           <ChipFiltro activo={paso === 2} onClick={irAPaso2}>
             2. Ubicación y privacidad
           </ChipFiltro>
-          {perfilExistente && (
-            <ChipFiltro activo={paso === 3} onClick={() => setPaso(3)}>
-              3. Servicios ({perfilExistente.servicios.length})
-            </ChipFiltro>
-          )}
+          {/* El paso 3 se ve siempre, para que "Paso 1 de 3" calce; se habilita al guardar el taller. */}
+          <ChipFiltro
+            activo={paso === 3}
+            onClick={() => setPaso(3)}
+            disabled={!perfilExistente}
+            title={perfilExistente ? undefined : "Primero guarda tu taller"}
+            className="disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            3. Servicios{perfilExistente ? ` (${perfilExistente.servicios.length})` : ""}
+          </ChipFiltro>
         </div>
 
         {errorGeneral && (
@@ -465,7 +470,7 @@ export function MiTaller() {
                 <div className="mt-1.5 flex items-center gap-2">
                   <span
                     aria-hidden="true"
-                    className="inline-flex min-h-12 items-center rounded-xl border-2 border-borde bg-menta-clara px-4 text-lg font-bold text-tinta"
+                    className="inline-flex min-h-12 shrink-0 items-center rounded-xl border-2 border-borde bg-menta-clara px-4 text-lg font-bold whitespace-nowrap text-tinta"
                   >
                     +56 9
                   </span>
@@ -495,7 +500,7 @@ export function MiTaller() {
                 <div className="mt-1.5 flex items-center gap-2">
                   <span
                     aria-hidden="true"
-                    className="inline-flex min-h-12 items-center rounded-xl border-2 border-borde bg-menta-clara px-4 text-lg font-bold text-tinta"
+                    className="inline-flex min-h-12 shrink-0 items-center rounded-xl border-2 border-borde bg-menta-clara px-4 text-lg font-bold whitespace-nowrap text-tinta"
                   >
                     +56 9
                   </span>
