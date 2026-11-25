@@ -15,6 +15,7 @@ import { rutasImpacto } from "./modules/impacto/rutas.js";
 import { rutasMercado } from "./modules/mercado/rutas.js";
 import { rutasOficios } from "./modules/oficios/rutas.js";
 import { rutasOrientacion } from "./modules/orientacion/rutas.js";
+import { rutasRepartidores } from "./modules/repartidores/rutas.js";
 
 export function crearApp(db: Db) {
   const app = express();
@@ -43,6 +44,7 @@ export function crearApp(db: Db) {
   app.use("/api/catalogo", rutasCatalogo());
   app.use("/api/orientacion", rutasOrientacion());
   app.use("/api/oficios", rutasOficios(db));
+  app.use("/api/repartidores", rutasRepartidores(db));
   app.use("/api/fundaciones", rutasFundaciones(db));
   app.use("/api/donaciones", rutasDonaciones(db));
   app.use("/api/impacto", rutasImpacto(db));

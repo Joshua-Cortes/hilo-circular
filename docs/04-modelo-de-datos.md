@@ -16,6 +16,10 @@ erDiagram
   publicaciones ||--o{ conversaciones : "genera"
   usuarios ||--o{ conversaciones : "compra"
   conversaciones ||--o{ mensajes : "contiene"
+  usuarios ||--o{ restablecimientos_clave : "solicita"
+  usuarios ||--o| repartidores : "ofrece reparto"
+  usuarios ||--o{ contactos_reparto : "contacta"
+  repartidores ||--o{ contactos_reparto : "recibe"
 
   usuarios {
     uuid id PK
@@ -23,6 +27,12 @@ erDiagram
     text password_hash
     text nombre
     rol rol "persona | oficio | fundacion | admin"
+  }
+  restablecimientos_clave {
+    uuid id PK
+    uuid usuario_id FK
+    text token_hash UK
+    timestamptz expira_en
   }
   oficios {
     uuid id PK
@@ -62,6 +72,23 @@ erDiagram
     bool acepta_danada
     bool verificado
     bool activo
+  }
+  repartidores {
+    uuid id PK
+    uuid usuario_id UK
+    text nombre_publico
+    text[] comunas
+    text whatsapp
+    text telefono
+    bool verificado
+    bool activo
+  }
+  contactos_reparto {
+    uuid id PK
+    uuid repartidor_id FK
+    uuid usuario_id FK
+    text comuna
+    canal_contacto canal
   }
   donaciones {
     uuid id PK
@@ -129,6 +156,8 @@ Todas las tablas, salvo `contactos`, `fotos_publicacion`, `conversaciones` y `me
 - **Una conversación por comprador y prenda** (índice único `publicacion_id + comprador_id`). Guardar también `vendedor_id` evita un *join* para armar la bandeja de entrada.
 - **"Sin leer" es `leido_en IS NULL`.** No hace falta una tabla de estados por participante, porque cada conversación tiene exactamente dos personas.
 - **Coordenadas como `float8`.** No se usa PostGIS, para que el mismo esquema funcione en PGlite (ver decisión D4 en [02-arquitectura.md](02-arquitectura.md)).
+- **Delivery por comuna.** `repartidores.comunas` usa `text[]` con índice GIN para filtrar por cobertura local sin inventar repartidores ficticios; `contactos_reparto` registra cada contacto iniciado por comuna.
+- **Recuperación de contraseña con hash.** `restablecimientos_clave` guarda el hash del token (`token_hash`), con expiración a los 30 minutos y consumo de un solo uso al restablecer la clave.
 
 ## Cambios al modelo
 

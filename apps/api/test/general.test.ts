@@ -39,6 +39,7 @@ describe("API general", () => {
       oficiosActivos: 0,
       puntosDonacion: 0,
       contactosReparacion: 0,
+      contactosDelivery: 0,
       donacionesRecibidas: 0,
       donacionesPendientes: 0,
       prendasDonadas: 0,

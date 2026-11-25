@@ -29,3 +29,10 @@ export const cambiarClave = z.object({
   claveActual: z.string().min(1, "Escribe tu contraseña actual").max(200),
   claveNueva: z.string().min(8, "La contraseña nueva debe tener al menos 8 caracteres").max(200),
 });
+
+export const solicitarRestablecimiento = z.object({ email });
+
+export const restablecerClave = z.object({
+  token: z.string().min(32).max(200),
+  clave: z.string().min(8, "La contraseña debe tener al menos 8 caracteres").max(200),
+});

@@ -50,6 +50,21 @@ export const usuarios = pgTable("usuarios", {
   ...timestamps,
 });
 
+/** Tokens temporales de un solo uso; solo se guarda su hash. */
+export const restablecimientosClave = pgTable(
+  "restablecimientos_clave",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    usuarioId: uuid("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiraEn: timestamp("expira_en", { withTimezone: true }).notNull(),
+    ...timestamps,
+  },
+  (t) => [index("restablecimientos_clave_usuario_idx").on(t.usuarioId)],
+);
+
 /** Perfil público de un oficio (costurera, zapatero, etc.). Un usuario con rol "oficio" tiene a lo más uno. */
 export const oficios = pgTable("oficios", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -88,6 +103,27 @@ export const servicios = pgTable(
     ...timestamps,
   },
   (t) => [index("servicios_oficio_idx").on(t.oficioId), index("servicios_prendas_idx").using("gin", t.prendas)],
+);
+
+/** Perfil de reparto local, con cobertura explícita por comuna. */
+export const repartidores = pgTable(
+  "repartidores",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    usuarioId: uuid("usuario_id")
+      .notNull()
+      .unique()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    nombrePublico: text("nombre_publico").notNull(),
+    descripcion: text("descripcion").notNull().default(""),
+    comunas: text("comunas").array().notNull().default([]),
+    whatsapp: text("whatsapp"),
+    telefono: text("telefono"),
+    verificado: boolean("verificado").notNull().default(false),
+    activo: boolean("activo").notNull().default(true),
+    ...timestamps,
+  },
+  (t) => [index("repartidores_comunas_idx").using("gin", t.comunas), index("repartidores_activo_idx").on(t.activo)],
 );
 
 export type Horario = { dia: number; abre: string; cierra: string };
@@ -153,6 +189,22 @@ export const contactos = pgTable(
     creadoEn: timestamp("creado_en", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("contactos_oficio_idx").on(t.oficioId)],
+);
+
+/** Contacto iniciado para coordinar un reparto en una comuna cubierta. */
+export const contactosReparto = pgTable(
+  "contactos_reparto",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    repartidorId: uuid("repartidor_id")
+      .notNull()
+      .references(() => repartidores.id, { onDelete: "cascade" }),
+    usuarioId: uuid("usuario_id").references(() => usuarios.id, { onDelete: "set null" }),
+    comuna: text("comuna").notNull(),
+    canal: canalContactoEnum("canal").notNull(),
+    creadoEn: timestamp("creado_en", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("contactos_reparto_repartidor_idx").on(t.repartidorId)],
 );
 
 /** Prenda publicada en el mercado de segunda mano. No hay pasarela de pago: se acuerda por chat o WhatsApp. */
@@ -243,6 +295,11 @@ export const mensajes = pgTable(
 export const oficiosRelations = relations(oficios, ({ many, one }) => ({
   servicios: many(servicios),
   usuario: one(usuarios, { fields: [oficios.usuarioId], references: [usuarios.id] }),
+}));
+
+export const repartidoresRelations = relations(repartidores, ({ many, one }) => ({
+  usuario: one(usuarios, { fields: [repartidores.usuarioId], references: [usuarios.id] }),
+  contactos: many(contactosReparto),
 }));
 
 export const serviciosRelations = relations(servicios, ({ one }) => ({

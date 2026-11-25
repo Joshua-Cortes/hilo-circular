@@ -18,9 +18,13 @@ Base: `http://localhost:3000/api` en desarrollo. Todas las respuestas son JSON.
 | POST | `/oficios/:id/contacto` | `{ canal: "whatsapp" \| "telefono" }`. Registra el contacto y devuelve `{ url }` (`https://wa.me/…` o `tel:…`). La sesión es opcional |
 | GET | `/fundaciones` | Puntos de donación (ver parámetros abajo) |
 | GET | `/fundaciones/:id` | Detalle de una fundación |
-| GET | `/impacto` | Indicadores de impacto, incluidos `publicacionesActivas` y `prendasRecirculadas` del mercado |
+| GET | `/repartidores` | Directorio de repartidores activos; acepta `?comuna=` |
+| POST | `/repartidores/:id/contacto` | `{ comuna, canal }` (`"whatsapp"` \| `"telefono"`). Registra el contacto por zona y devuelve `{ canal, url }`. La sesión es opcional |
+| GET | `/impacto` | Indicadores de impacto, incluidos `publicacionesActivas`, `prendasRecirculadas` y `contactosDelivery` |
 | POST | `/auth/registro` | `{ nombre, email, clave, rol? }` (`rol`: `persona` u `oficio`; por defecto `persona`). Devuelve `{ token, usuario }` |
 | POST | `/auth/ingreso` | `{ email, clave }`. Devuelve `{ token, usuario }`. Ante cualquier error responde `401 credenciales_invalidas` con el mismo mensaje |
+| POST | `/auth/recuperar` | `{ email }`. Responde `200` sin revelar si la cuenta existe; en desarrollo devuelve `{ resetUrl }` y en producción envía el enlace vía Resend (`30 min`, un solo uso) |
+| POST | `/auth/restablecer` | `{ token, clave }`. Valida el token de un solo uso y actualiza la contraseña |
 | GET | `/mercado` | Prendas publicadas, sin las vendidas (ver parámetros abajo) |
 | GET | `/mercado/:id` | Detalle con fotos, vendedor y `canales`. Nunca expone el WhatsApp de otra persona |
 | GET | `/mercado/fotos/:id` | La imagen en sí (cache inmutable de un año) |
@@ -101,6 +105,11 @@ GET /api/oficios?lat=-29.9027&lng=-71.252&categoria=costura
 | PATCH | `/donaciones/:id/recepcion` | fundacion | Confirma la recepción. Solo entonces la donación cuenta como impacto |
 | PATCH | `/donaciones/:id/cancelacion` | persona, oficio | Quien donó cancela una donación aún no recibida |
 | GET | `/auth/yo` | cualquiera | Datos de la cuenta |
+| PATCH | `/auth/yo` | cualquiera | Actualiza `nombre` y/o `email` de la cuenta y devuelve un token renovado |
+| PATCH | `/auth/clave` | cualquiera | `{ claveActual, claveNueva }`. Cambia la contraseña validando la clave actual |
+| GET | `/repartidores/yo` | cualquiera | Perfil propio de repartidor (`null` si aún no se crea) |
+| POST | `/repartidores` | cualquiera | Crea perfil de repartidor (`nombrePublico`, `comunas`, `whatsapp` o `telefono`, `descripcion?`) |
+| PATCH | `/repartidores/yo` | cualquiera | Actualiza el perfil de repartidor o cambia `activo` para pausar/reactivar |
 | POST | `/mercado` | cualquiera | Publica una prenda. Acepta hasta 4 `fotos: [{ mime, datos }]` en base64 (JPEG, PNG o WebP, máx. 700 KB cada una; se revisa la firma del archivo). El cuerpo admite hasta 4 MB |
 | GET | `/mercado/mias` | cualquiera | Publicaciones propias, incluidas las vendidas, con cuántas conversaciones tiene cada una |
 | PATCH | `/mercado/:id` | dueño | Edición parcial, incluido `estado`: `disponible`, `reservada` o `vendida` |
@@ -112,6 +121,16 @@ GET /api/oficios?lat=-29.9027&lng=-71.252&categoria=costura
 | POST | `/conversaciones/:id/mensajes` | participante | `{ texto }` (1 a 1000 caracteres) |
 
 El chat no usa WebSockets: el frontend consulta la conversación abierta cada 4 segundos y la bandeja cada 12. Para una compraventa entre vecinos alcanza, y funciona igual en cualquier hosting.
+
+### Delivery local
+
+- `GET /repartidores` acepta `?comuna=` para filtrar perfiles activos que cubren esa comuna.
+- `POST /repartidores` y `PATCH /repartidores/yo` permiten a cualquier cuenta autenticada ofrecer reparto, editar sus comunas y canales de contacto o pausar su perfil.
+- `POST /repartidores/:id/contacto` registra el contacto en `contactos_reparto` (contabilizado en `/impacto` como `contactosDelivery`) y devuelve `{ canal, url }`.
+
+### Recuperación de contraseña por correo
+
+En desarrollo (`NODE_ENV=development`), `POST /auth/recuperar` devuelve `{ resetUrl }` para probar `/recuperar?token=…` sin credenciales SMTP. En producción requiere configurar `APP_URL`, `RESEND_API_KEY` y un remitente verificado en `EMAIL_FROM`.
 
 ### Reglas de `POST /donaciones`
 
