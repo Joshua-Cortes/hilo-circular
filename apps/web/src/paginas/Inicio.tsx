@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, HandHeart, MapPin, Plus, Recycle, Scissors, Store } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Bike, HandHeart, MapPin, Plus, Recycle, Scissors, Store } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Asistente } from "../componentes/Asistente";
@@ -55,7 +55,7 @@ export function Inicio() {
           Tu ropa merece <em className="acento">otra vuelta</em>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-xl text-tinta-suave md:text-2xl">
-          Repárala con un oficio de tu barrio, dónala a quien la necesita o véndela a alguien que la va a usar.
+          Repárala con un oficio de tu barrio, dónala a quien la necesita, véndela o coordina su entrega local.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <a href="#caminos" className="boton-primario">
@@ -205,6 +205,28 @@ export function Inicio() {
                 Publicar prenda <ArrowRight className="size-5" aria-hidden="true" />
               </p>
             </div>
+          </Link>
+
+          {/* 05 · Delivery local */}
+          <Link
+            to="/delivery"
+            className="group bento-enlace flex flex-col justify-between gap-6 bg-kraft-clara md:col-span-2 lg:col-span-4 lg:flex-row lg:items-center"
+          >
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+              <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-superficie text-kraft-tinta">
+                <Bike className="size-7" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="etiqueta text-kraft-tinta">05 · Delivery local</p>
+                <h2 className="mt-2 text-3xl md:text-4xl">
+                  Que llegue a <em className="acento">tu zona</em>
+                </h2>
+                <p className="mt-2 max-w-2xl text-lg text-tinta-800">
+                  Encuentra repartidores por comuna y coordina directamente el traslado de ropa en La Serena y Coquimbo.
+                </p>
+              </div>
+            </div>
+            <Flecha />
           </Link>
         </div>
       </section>

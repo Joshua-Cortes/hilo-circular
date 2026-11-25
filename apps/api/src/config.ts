@@ -25,4 +25,7 @@ export const config = {
   webDist: process.env.WEB_DIST ?? fileURLToPath(new URL("../../web/dist", import.meta.url)),
   /** En producción los datos demo solo se cargan si se pide explícitamente (para la presentación). */
   cargarDemo: process.env.CARGAR_DEMO === "true",
+  appUrl: process.env.APP_URL ?? "http://localhost:5173",
+  resendApiKey: process.env.RESEND_API_KEY,
+  emailFrom: process.env.EMAIL_FROM,
 };

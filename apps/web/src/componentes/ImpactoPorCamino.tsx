@@ -1,4 +1,4 @@
-import { ArrowUpRight, HandHeart, Scissors, Store } from "lucide-react";
+import { ArrowUpRight, Bike, HandHeart, Scissors, Store } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, type Impacto } from "../lib/api";
@@ -55,6 +55,16 @@ const CAMINOS: Camino[] = [
     otras: [{ clave: "publicacionesActivas", etiqueta: "prendas buscando nueva dueña o dueño" }],
     comoSeMide: "Publicaciones que la persona vendedora marcó como vendidas.",
   },
+  {
+    numero: "05",
+    nombre: "Delivery",
+    icono: Bike,
+    a: "/delivery",
+    tono: "bg-superficie",
+    principal: { clave: "contactosDelivery", etiqueta: "contactos de reparto por zona" },
+    otras: [],
+    comoSeMide: "Cada vez que alguien contacta por WhatsApp o llamada a un repartidor activo en su comuna.",
+  },
 ];
 
 export function ImpactoPorCamino() {
@@ -73,7 +83,7 @@ export function ImpactoPorCamino() {
   const valor = (clave: keyof Impacto) => (impacto ? formato.format(impacto[clave]) : "—");
 
   return (
-    <div className="mt-10 grid gap-3 lg:grid-cols-3">
+    <div className="mt-10 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
       {CAMINOS.map(({ numero, nombre, icono: Icono, a, tono, claro, principal, otras, comoSeMide }) => (
         <section key={nombre} aria-labelledby={`impacto-${nombre}`} className={cn("bento flex flex-col gap-6", tono)}>
           <div className="flex items-start justify-between gap-3">
@@ -90,14 +100,16 @@ export function ImpactoPorCamino() {
             </span>
             <span className="mt-1 block text-lg font-bold">{principal.etiqueta}</span>
           </p>
-          <dl className={cn("grid gap-2 border-t pt-4", claro ? "border-fondo/20" : "border-tinta/10")}>
-            {otras.map(({ clave, etiqueta }) => (
-              <div key={clave} className="flex items-baseline justify-between gap-3">
-                <dt className={claro ? "text-fondo/85" : "text-tinta-800"}>{etiqueta}</dt>
-                <dd className="font-display text-2xl font-bold tabular-nums">{valor(clave)}</dd>
-              </div>
-            ))}
-          </dl>
+          {otras.length > 0 && (
+            <dl className={cn("grid gap-2 border-t pt-4", claro ? "border-fondo/20" : "border-tinta/10")}>
+              {otras.map(({ clave, etiqueta }) => (
+                <div key={clave} className="flex items-baseline justify-between gap-3">
+                  <dt className={claro ? "text-fondo/85" : "text-tinta-800"}>{etiqueta}</dt>
+                  <dd className="font-display text-2xl font-bold tabular-nums">{valor(clave)}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
           <p className={cn("mt-auto text-sm", claro ? "text-fondo/75" : "text-tinta-suave")}>
             <strong>Cómo se mide:</strong> {comoSeMide}
           </p>

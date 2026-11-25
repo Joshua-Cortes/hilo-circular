@@ -196,3 +196,22 @@ flowchart LR
 - Una prenda vendida no admite conversaciones nuevas.
 - La página muestra consejos de seguridad: juntarse en un lugar público y no transferir por adelantado.
 
+## CU9 — Coordinar un reparto local
+
+**Actor.** Vecina/o que necesita trasladar una prenda, o repartidor/a local registrado en la plataforma.
+
+**Flujo**
+
+1. Quien necesita traslado entra al directorio de Delivery (`/delivery`) y puede filtrar por comuna.
+2. Si hay repartidores activos en esa comuna, elige uno y lo contacta por WhatsApp o llamada telefónica; la plataforma registra el contacto por zona (`contactos_reparto`) y abre el canal directo.
+3. Si aún no hay repartidores registrados, la vista muestra un estado vacío sin perfiles ficticios e invita a ofrecer reparto.
+4. Quien quiere repartir inicia sesión, entra a `/delivery/mi-perfil` y crea su perfil indicando nombre público, descripción opcional, comunas de cobertura y medio de contacto (WhatsApp y/o teléfono).
+5. Desde su perfil puede actualizar datos o pausar/reactivar su disponibilidad en cualquier momento.
+
+**Reglas**
+
+- Solo existe un perfil de repartidor por cuenta; no se generan perfiles de ejemplo ni semillas ficticias.
+- El perfil exige al menos una comuna de cobertura y al menos un medio de contacto (WhatsApp o teléfono).
+- Solo los perfiles activos aparecen en el directorio público y aceptan nuevos registros de contacto para sus comunas cubiertas.
+
+

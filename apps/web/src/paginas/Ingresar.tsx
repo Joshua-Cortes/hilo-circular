@@ -1,6 +1,6 @@
 import { KeyRound, Scissors, User } from "lucide-react";
 import { type FormEvent, useState } from "react";
-import { Navigate, useNavigate, useSearchParams } from "react-router";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router";
 import { api, ErrorApi } from "../lib/api";
 import { cn } from "../lib/cn";
 import { useSesion } from "../lib/sesion";
@@ -99,8 +99,8 @@ export function Ingresar() {
             )}
           </h1>
           <p className="mt-4 text-lg text-tinta-800">
-            Con una cuenta puedes publicar prendas, conversar con compradores y avisar a las fundaciones que vas a
-            donar. Buscar oficios y puntos de donación no la necesita.
+            Con una cuenta puedes publicar prendas, conversar con compradores, ofrecer reparto local o avisar a las
+            fundaciones que vas a donar. Buscar no necesita cuenta.
           </p>
         </div>
         <div className="mt-8 rounded-3xl bg-superficie p-5">
@@ -192,6 +192,12 @@ export function Ingresar() {
             )}
             {errores.clave && <p className="mt-1.5 text-sm font-bold text-alerta">{errores.clave}</p>}
           </div>
+
+          {modo === "ingreso" && (
+            <Link to="/recuperar" className="-mt-3 w-fit font-bold text-hoja-oscura underline underline-offset-4">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          )}
 
           {modo === "registro" && (
             <fieldset>

@@ -1,4 +1,7 @@
+import { createHash } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { restablecimientosClave } from "../src/db/schema.js";
 import { CLAVE_DEMO } from "../src/db/semilla.js";
 import { crearEntorno, type Entorno } from "./ayudantes.js";
 
@@ -149,6 +152,72 @@ describe("cuentas", () => {
       .api()
       .post("/api/auth/ingreso")
       .send({ email: "sofia@correo.cl", clave: "nuevaclave456" });
+    expect(ingresoNuevo.status).toBe(200);
+  });
+
+  it("solicita recuperación de clave sin revelar si el correo existe y almacena solo el hash", async () => {
+    const registro = await entorno
+      .api()
+      .post("/api/auth/registro")
+      .send({ nombre: "Camila", email: "camila-reset@correo.cl", clave: "claveInicial123" });
+    expect(registro.status).toBe(201);
+    const usuarioId = registro.body.datos.usuario.id as string;
+
+    const existente = await entorno.api().post("/api/auth/recuperar").send({ email: "camila-reset@correo.cl" });
+    expect(existente.status).toBe(200);
+
+    const inexistente = await entorno.api().post("/api/auth/recuperar").send({ email: "no-existe@correo.cl" });
+    expect(inexistente.status).toBe(200);
+    expect(inexistente.body).toEqual(existente.body);
+
+    const filas = await entorno.db
+      .select()
+      .from(restablecimientosClave)
+      .where(eq(restablecimientosClave.usuarioId, usuarioId));
+    expect(filas).toHaveLength(1);
+    expect(filas[0].tokenHash).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("restablece la contraseña con token válido de un solo uso y rechaza tokens expirados", async () => {
+    const { usuario } = await entorno.crearUsuario("persona");
+    const tokenValido = "token-valido-de-prueba-32-caracteres";
+    const tokenExpirado = "token-expirado-de-prueba-32-caracteres";
+
+    await entorno.db.insert(restablecimientosClave).values([
+      {
+        usuarioId: usuario.id,
+        tokenHash: createHash("sha256").update(tokenValido).digest("hex"),
+        expiraEn: new Date(Date.now() + 10 * 60 * 1000),
+      },
+      {
+        usuarioId: usuario.id,
+        tokenHash: createHash("sha256").update(tokenExpirado).digest("hex"),
+        expiraEn: new Date(Date.now() - 60 * 1000),
+      },
+    ]);
+
+    const rechazadoExpirado = await entorno
+      .api()
+      .post("/api/auth/restablecer")
+      .send({ token: tokenExpirado, clave: "claveNueva999" });
+    expect(rechazadoExpirado.status).toBe(400);
+    expect(rechazadoExpirado.body.error.codigo).toBe("enlace_expirado");
+
+    const ok = await entorno.api().post("/api/auth/restablecer").send({ token: tokenValido, clave: "claveNueva999" });
+    expect(ok.status).toBe(204);
+
+    // El mismo token no se puede reutilizar ni queda rastro activo para la cuenta.
+    const reusado = await entorno
+      .api()
+      .post("/api/auth/restablecer")
+      .send({ token: tokenValido, clave: "otraClave999" });
+    expect(reusado.status).toBe(400);
+    expect(reusado.body.error.codigo).toBe("enlace_expirado");
+
+    const ingresoNuevo = await entorno
+      .api()
+      .post("/api/auth/ingreso")
+      .send({ email: usuario.email, clave: "claveNueva999" });
     expect(ingresoNuevo.status).toBe(200);
   });
 });

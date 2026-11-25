@@ -22,6 +22,7 @@ export type Impacto = {
   oficiosActivos: number;
   puntosDonacion: number;
   contactosReparacion: number;
+  contactosDelivery: number;
   donacionesRecibidas: number;
   donacionesPendientes: number;
   prendasDonadas: number;
@@ -236,6 +237,34 @@ export type DatosGuardarOficio = {
   telefono?: string;
 };
 
+export type RepartidorPublico = {
+  id: string;
+  nombrePublico: string;
+  descripcion: string;
+  comunas: string[];
+  canales: { whatsapp: boolean; telefono: boolean };
+  verificado: boolean;
+};
+
+export type MiReparto = {
+  id: string;
+  nombrePublico: string;
+  descripcion: string;
+  comunas: string[];
+  whatsapp: string | null;
+  telefono: string | null;
+  verificado: boolean;
+  activo: boolean;
+};
+
+export type DatosGuardarReparto = {
+  nombrePublico: string;
+  descripcion: string;
+  comunas: string[];
+  whatsapp?: string | null;
+  telefono?: string | null;
+};
+
 export type DatosCrearServicio = {
   categoria: string;
   titulo: string;
@@ -260,6 +289,8 @@ export type RespuestaContacto = {
   canal: CanalContacto;
   url: string;
 };
+
+export type CanalContactoReparto = CanalContacto;
 
 export type DetalleError = {
   campo: string;
@@ -371,11 +402,31 @@ export const api = {
       method: "DELETE",
     }),
 
+  // Delivery
+  repartidores: (comuna?: string) => {
+    const qs = comuna ? `?${new URLSearchParams({ comuna })}` : "";
+    return pedir<RepartidorPublico[]>(`/repartidores${qs}`);
+  },
+  contactarRepartidor: (id: string, comuna: string, canal: CanalContactoReparto) =>
+    pedir<RespuestaContacto>(`/repartidores/${encodeURIComponent(id)}/contacto`, {
+      method: "POST",
+      body: JSON.stringify({ comuna, canal }),
+    }),
+  miReparto: () => pedir<MiReparto | null>("/repartidores/yo"),
+  crearMiReparto: (datos: DatosGuardarReparto) =>
+    pedir<MiReparto>("/repartidores", { method: "POST", body: JSON.stringify(datos) }),
+  actualizarMiReparto: (datos: Partial<DatosGuardarReparto> & { activo?: boolean }) =>
+    pedir<MiReparto>("/repartidores/yo", { method: "PATCH", body: JSON.stringify(datos) }),
+
   // Cuentas
   registro: (datos: { nombre: string; email: string; clave: string; rol: "persona" | "oficio" }) =>
     pedir<Sesion>("/auth/registro", { method: "POST", body: JSON.stringify(datos) }),
   ingreso: (datos: { email: string; clave: string }) =>
     pedir<Sesion>("/auth/ingreso", { method: "POST", body: JSON.stringify(datos) }),
+  solicitarRecuperacion: (email: string) =>
+    pedir<{ resetUrl?: string }>("/auth/recuperar", { method: "POST", body: JSON.stringify({ email }) }),
+  restablecerClave: (token: string, clave: string) =>
+    pedir<void>("/auth/restablecer", { method: "POST", body: JSON.stringify({ token, clave }) }),
   actualizarCuenta: (datos: { nombre?: string; email?: string; claveActual?: string }) =>
     pedir<Usuario>("/auth/yo", { method: "PATCH", body: JSON.stringify(datos) }),
   cambiarClave: (datos: { claveActual: string; claveNueva: string }) =>

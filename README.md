@@ -2,11 +2,13 @@
 
 **Tu ropa merece otra vuelta.**
 
-Hilo Circular es una plataforma web de economía circular textil para La Serena y Coquimbo. Tres caminos para que la ropa que todavía sirve no termine en la basura:
+Hilo Circular es una plataforma web de economía circular textil para La Serena y Coquimbo. Cuatro caminos e indicadores compartidos para que la ropa que todavía sirve no termine en la basura:
 
 1. **Reparar.** Encuentra la costurera, el zapatero o la tejedora de tu barrio y escríbele por WhatsApp.
 2. **Donar.** Revisa que tu prenda pase un filtro de calidad y elige en el mapa un punto de donación que la reciba.
 3. **Mercado.** Publica la ropa que ya no usas o compra la de otra persona. Sin pagos en línea: se conversa por el chat de la plataforma o por WhatsApp.
+4. **Impacto.** Revisa métricas públicas de prendas recirculadas, donaciones confirmadas y contactos locales.
+5. **Delivery.** Directorio de repartidores por comuna (sin perfiles ficticios) para coordinar traslados directos por WhatsApp o teléfono.
 
 La idea completa, en una página: **[docs/00-la-idea.md](docs/00-la-idea.md)**.
 
@@ -56,28 +58,31 @@ En desarrollo la API crea la base local y carga los datos demo de La Serena y Co
 | `npm run build` | Compila la API y la web |
 | `npm run db:generate -w @hilo/api -- --name cambio` | Genera una migración después de modificar `schema.ts` |
 
-Para usar un PostgreSQL real, copia `apps/api/.env.example` como `apps/api/.env` y define `DATABASE_URL`.
+Para usar un PostgreSQL real, copia `apps/api/.env.example` como `apps/api/.env` y define `DATABASE_URL`. Para habilitar la recuperación de contraseña por correo en producción, configura además `APP_URL`, `RESEND_API_KEY` y `EMAIL_FROM` con un remitente verificado en Resend (en desarrollo local la API devuelve el enlace directo para pruebas sin credenciales).
 
 > **Usuarios de Windows:** npm falla si la ruta de la carpeta tiene el carácter `&` (por ejemplo, `Informatica & Sociedad`), porque cmd.exe lo interpreta como separador de comandos. Clona el repositorio en una ruta sin `&`.
 
 ## Estructura y rutas implementadas
 
 ```text
-apps/api   API REST: Node.js 22 · Express 5 · Drizzle ORM · PostgreSQL/PGlite · Zod · Vitest (59 tests)
+apps/api   API REST: Node.js 22 · Express 5 · Drizzle ORM · PostgreSQL/PGlite · Zod · Vitest (68 tests)
 apps/web   SPA: React 19 · TypeScript · Vite · Tailwind CSS 4 · Leaflet
 docs/      Fundamentación, arquitectura, casos de uso, manual de uso, mockups y entregas
 ```
 
 | Ruta en la web | Camino | Qué hace |
 |---|---|---|
-| `/` | Inicio | Asistente de orientación (CU0), cifras del problema, grilla bento con los 3 caminos e indicadores en vivo |
+| `/` | Inicio | Asistente de orientación (CU0), cifras del problema, grilla bento con los caminos e indicadores en vivo |
 | `/reparar` y `/reparar/:id` | **1 · Reparar** | Búsqueda de talleres por oficio, prenda, texto y cercanía (CU1); perfil con precios, mapa aproximado (~1 km) y contacto por WhatsApp |
 | `/mi-taller` | **1 · Reparar** | Formulario guiado de 3 pasos para publicar o editar un taller y gestionar sus servicios (CU3) |
-| `/donar` | **2 · Donar** | Filtro de calidad de 5 preguntas, mapa Leaflet con 10 puntos de donación/reciclaje y registro de donación validada (CU2) |
+| `/donar` y `/mis-donaciones` | **2 · Donar** | Filtro de calidad de 5 preguntas, mapa Leaflet con 10 puntos de donación/reciclaje, registro y seguimiento de donaciones (CU2) |
+| `/mi-fundacion` | **2 · Donar** | Panel de fundación para actualizar horarios/necesidades y confirmar donaciones recibidas (CU5) |
 | `/mercado`, `/mercado/:id`, `/mercado/publicar`, `/mercado/mias` | **3 · Mercado** | Publicación de prendas con fotos, búsqueda, reserva/venta (CU7) |
 | `/mensajes` | **3 · Mercado** | Chat interno entre personas compradoras y vendedoras (CU8) |
-| `/ingresar` | Transversal | Inicio de sesión y registro por rol (`persona`, `oficio`, `fundacion`) (CU4) |
-| `/impacto` | Transversal | Indicadores públicos de impacto por camino (CU6) |
+| `/impacto` | **4 · Impacto** | Indicadores públicos de impacto por camino y contactos de reparto (CU6) |
+| `/delivery` y `/delivery/mi-perfil` | **5 · Delivery** | Directorio filtrable por comuna (con estado vacío sin repartidores ficticios) y perfil propio para ofrecer o pausar reparto (CU9) |
+| `/ingresar` y `/recuperar` | Transversal | Inicio de sesión, registro por rol (`persona`, `oficio`, `fundacion`) y recuperación de contraseña con enlace temporal (CU4) |
+| `/ajustes` | Transversal | Actualización de nombre, correo y contraseña de la cuenta autenticada |
 
 ## Cómo trabajamos
 

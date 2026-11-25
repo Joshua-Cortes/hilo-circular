@@ -21,6 +21,8 @@ Cada camino es una pantalla y responde a una pregunta concreta. No hay nada más
 | **1 · Reparar** | "Se me rompió, ¿quién me lo arregla?" | Busca oficios (costura, zapatería, tejido…) filtrando por comuna, oficio y prenda | WhatsApp directo al oficio |
 | **2 · Donar** | "Ya no la uso, ¿dónde la dejo?" | Pasa un **filtro de calidad** de 5 preguntas y elige en un **mapa** (con la lista de puntos a la derecha) dónde llevarla | Avisa en la plataforma que va a donar; la fundación confirma al recibir |
 | **3 · Mercado** | "Ya no la uso, pero alguien la compraría" | Publica la prenda con fotos, o compra una | **Chat interno** entre comprador y vendedor y, si el vendedor quiere, WhatsApp |
+| **4 · Impacto** | "¿Cuánto estamos logrando juntos?" | Consulta indicadores agregados de reparación, donación, mercado y reparto | Cifras públicas actualizadas desde la plataforma |
+| **5 · Delivery** | "¿Cómo coordino un traslado local?" | Filtra repartidores activos por comuna u ofrece reparto con tu perfil | Contacto directo por WhatsApp o teléfono registrado por zona |
 
 Si la persona no sabe qué camino tomar, un asistente de dos preguntas ("¿qué prenda es?" y "¿en qué estado está?") la deriva al correcto, siguiendo la **jerarquía de residuos**: primero reutilizar (donar o vender), luego reparar y solo al final reciclar.
 
@@ -48,7 +50,7 @@ flowchart LR
 Decir que no ordena el proyecto tanto como decir que sí:
 
 - **No procesa pagos.** El mercado conecta personas; el pago y la entrega se acuerdan entre ellas.
-- **No hace envíos** ni logística: todo es local, entre vecinos.
+- **No intermedia pagos ni flotas propias:** todo el contacto (reparación, compra o coordinación de reparto por comuna) es local y directo entre vecinos.
 - **No reemplaza a WhatsApp**: lo usa. El chat interno existe para quien no quiere publicar su número.
 - **No es una tienda** ni cobra comisión a nadie.
 - **Solo La Serena y Coquimbo** durante el piloto.
@@ -62,6 +64,7 @@ Una cifra por camino, visibles en vivo en `/impacto`:
 | Reparar | Contactos a oficios por WhatsApp (reparaciones iniciadas) |
 | Donar | Donaciones confirmadas por la fundación y **kg de textil recuperado** (estimado por tipo de prenda) |
 | Mercado | Prendas publicadas y **prendas que cambiaron de dueño** (marcadas como vendidas) |
+| Delivery | Contactos de reparto iniciados por comuna (`contactosDelivery`) |
 
 ## Guion de demo (3 minutos)
 

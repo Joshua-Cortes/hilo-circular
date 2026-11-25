@@ -18,6 +18,17 @@ export function rutasAuth(db: Db) {
     res.json({ datos: await servicio.ingresar(db, datos) });
   });
 
+  rutas.post("/recuperar", async (req, res) => {
+    const { email } = validar(esquemas.solicitarRestablecimiento, req.body);
+    res.json({ datos: await servicio.solicitarRestablecimiento(db, email) });
+  });
+
+  rutas.post("/restablecer", async (req, res) => {
+    const { token, clave } = validar(esquemas.restablecerClave, req.body);
+    await servicio.restablecerClave(db, token, clave);
+    res.status(204).end();
+  });
+
   rutas.get("/yo", requiereSesion(), async (req, res) => {
     res.json({ datos: await servicio.obtenerYo(db, usuarioDe(req).id) });
   });

@@ -21,6 +21,7 @@ const ENLACES = [
   { a: "/donar", texto: "Donar" },
   { a: "/mercado", texto: "Mercado" },
   { a: "/impacto", texto: "Impacto" },
+  { a: "/delivery", texto: "Delivery" },
 ];
 
 export function Logo({ claro = false }: { claro?: boolean }) {

@@ -7,8 +7,11 @@ import { RequiereSesion } from "./componentes/RequiereSesion";
 import { Ingresar } from "./paginas/Ingresar";
 import { Inicio } from "./paginas/Inicio";
 import { Mercado } from "./paginas/Mercado";
+import { Recuperar } from "./paginas/Recuperar";
 import { Reparar } from "./paginas/Reparar";
 
+const Delivery = lazy(() => import("./paginas/Delivery").then((m) => ({ default: m.Delivery })));
+const MiReparto = lazy(() => import("./paginas/MiReparto").then((m) => ({ default: m.MiReparto })));
 const Donar = lazy(() => import("./paginas/Donar").then((m) => ({ default: m.Donar })));
 const Ajustes = lazy(() => import("./paginas/Ajustes").then((m) => ({ default: m.Ajustes })));
 const PerfilOficio = lazy(() => import("./paginas/PerfilOficio").then((m) => ({ default: m.PerfilOficio })));
@@ -125,6 +128,15 @@ export function App() {
             }
           />
           <Route path="/mercado/:id" element={<DetallePublicacion />} />
+          <Route path="/delivery" element={<Delivery />} />
+          <Route
+            path="/delivery/mi-perfil"
+            element={
+              <RequiereSesion>
+                <MiReparto />
+              </RequiereSesion>
+            }
+          />
           <Route
             path="/mensajes/:id?"
             element={
@@ -134,6 +146,7 @@ export function App() {
             }
           />
           <Route path="/ingresar" element={<Ingresar />} />
+          <Route path="/recuperar" element={<Recuperar />} />
           <Route
             path="/ajustes"
             element={

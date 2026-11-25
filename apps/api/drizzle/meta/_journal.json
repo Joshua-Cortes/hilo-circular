@@ -15,6 +15,20 @@
       "when": 1794334804473,
       "tag": "0001_mercado",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795131387155,
+      "tag": "0002_delivery_por_zona",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795131822662,
+      "tag": "0003_recuperar_clave",
+      "breakpoints": true
     }
   ]
 }
