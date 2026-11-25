@@ -39,7 +39,7 @@ flowchart LR
 | CU2 | Joshua (filtro, mapa y lista) | `GET /fundaciones`, `POST /donaciones` | Hecho |
 | CU3 | Bastian | `POST /oficios`, `PATCH /oficios/yo`, `/oficios/yo/servicios` | Hecho |
 | CU4 | Joshua | `POST /auth/registro`, `POST /auth/ingreso`, `GET /auth/yo` | Hecho |
-| CU5 | Hector | `PATCH /fundaciones/yo`, `GET /donaciones/mias`, `PATCH /donaciones/:id/recepcion` | API lista, falta la pantalla |
+| CU5 | Hector | `PATCH /fundaciones/yo`, `GET /donaciones/mias`, `PATCH /donaciones/:id/recepcion` | Hecho (`/mi-fundacion`) |
 | CU6 | Base del proyecto | `GET /impacto` | Hecho |
 | CU7 | Joshua | `POST /mercado`, `GET /mercado/mias`, `PATCH /mercado/:id`, `DELETE /mercado/:id` | Hecho |
 | CU8 | Joshua | `GET /mercado`, `GET /mercado/:id`, `POST /mercado/:id/conversacion`, `/conversaciones/*` | Hecho |

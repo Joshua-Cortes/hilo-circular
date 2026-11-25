@@ -32,6 +32,67 @@ export type Impacto = {
 
 export type Horario = { dia: number; abre: string; cierra: string };
 
+export type MiFundacion = {
+  id: string;
+  usuarioId: string;
+  nombre: string;
+  descripcion: string;
+  comuna: string;
+  direccion: string;
+  lat: number;
+  lng: number;
+  horarios: Horario[];
+  prendasAceptadas: string[];
+  necesidadesActuales: string;
+  aceptaDanada: boolean;
+  telefono: string | null;
+  email: string | null;
+  verificado: boolean;
+  activo: boolean;
+};
+
+export type DatosActualizarFundacion = Partial<
+  Pick<
+    MiFundacion,
+    | "nombre"
+    | "descripcion"
+    | "comuna"
+    | "direccion"
+    | "lat"
+    | "lng"
+    | "horarios"
+    | "prendasAceptadas"
+    | "necesidadesActuales"
+    | "aceptaDanada"
+    | "telefono"
+    | "email"
+    | "activo"
+  >
+>;
+
+export type EstadoDonacion = "registrada" | "recibida" | "cancelada";
+
+export type DonacionFundacion = {
+  id: string;
+  fundacionId: string;
+  donanteId: string | null;
+  estado: EstadoDonacion;
+  items: {
+    prenda: string;
+    cantidad: number;
+    estado: string;
+  }[];
+  totalPrendas: number;
+  kgEstimados: number;
+  creadoEn: string;
+  actualizadoEn: string;
+  recibidaEn: string | null;
+  fundacion: {
+    id: string;
+    nombre: string;
+  };
+};
+
 export type PuntoDonacion = {
   id: string;
   nombre: string;
@@ -321,6 +382,21 @@ export const api = {
     pedir<{ ok: boolean }>("/auth/clave", { method: "PATCH", body: JSON.stringify(datos) }),
 
   // Donar
+
+  // Panel de fundación
+  miFundacion: () => pedir<MiFundacion>("/fundaciones/yo"),
+
+  actualizarMiFundacion: (datos: DatosActualizarFundacion) =>
+    pedir<MiFundacion>("/fundaciones/yo", {
+      method: "PATCH",
+      body: JSON.stringify(datos),
+    }),
+
+  misDonaciones: () => pedir<DonacionFundacion[]>("/donaciones/mias"),
+
+  confirmarRecepcion: (id: string) =>
+    pedir<Omit<DonacionFundacion, "fundacion">>(`/donaciones/${encodeURIComponent(id)}/recepcion`, { method: "PATCH" }),
+
   puntosDonacion: (filtros: { prenda?: string; aceptaDanada?: boolean } = {}) => {
     const params = new URLSearchParams();
     if (filtros.prenda) params.set("prenda", filtros.prenda);
