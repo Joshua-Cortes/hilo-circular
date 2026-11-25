@@ -11,7 +11,7 @@ La configuración de Render está en [`render.yaml`](../render.yaml). Render pub
 
 ```mermaid
 flowchart LR
-  U(["Persona"]) -- "https://hilo-circular.onrender.com" --> R["Render<br/>API + web compilada"]
+  U(["Persona"]) -- "https://hilo-circular-cn33.onrender.com" --> R["Render<br/>API + web compilada"]
   R -- "DATABASE_URL" --> N[("Neon<br/>PostgreSQL")]
   R -. "teselas del mapa" .-> O["OpenStreetMap"]
 ```
@@ -54,7 +54,7 @@ gh pr create --base main --head develop --title "Entrega final: develop a main"
    API de Hilo Circular en http://localhost:10000/api · base de datos: PostgreSQL
    ```
 
-6. La URL pública aparece arriba, por ejemplo `https://hilo-circular.onrender.com`.
+6. La URL pública aparece arriba, bajo el nombre del servicio. La nuestra es **https://hilo-circular-cn33.onrender.com**. Render agregó `-cn33` porque `hilo-circular.onrender.com` ya era de otra persona: no usar esa dirección.
 
 `JWT_SECRET` lo genera Render solo y `CARGAR_DEMO=true` carga los datos de demostración.
 
