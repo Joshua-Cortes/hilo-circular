@@ -1,0 +1,29 @@
+# Despliegue en Render (https://render.com) como "Blueprint". Ver docs/10-despliegue.md.
+# Un solo servicio: la API compila y sirve también la web, así todo queda en una sola URL.
+services:
+  - type: web
+    name: hilo-circular
+    runtime: node
+    plan: free
+    region: virginia
+    branch: main
+    # Render define NODE_ENV=production también al compilar: sin --include=dev no se instalarían
+    # TypeScript ni Vite y el build fallaría.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start -w @hilo/api
+    healthCheckPath: /api/salud
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      # Render genera un secreto aleatorio para firmar las sesiones.
+      - key: JWT_SECRET
+        generateValue: true
+      # Cadena de conexión de Neon. Render la pide al crear el servicio (no queda en el repositorio).
+      - key: DATABASE_URL
+        sync: false
+      # Carga los oficios, puntos, prendas y cuentas demo para la presentación.
+      - key: CARGAR_DEMO
+        value: "true"

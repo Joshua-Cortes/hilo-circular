@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -18,7 +20,16 @@ export function crearApp(db: Db) {
   const app = express();
 
   app.disable("x-powered-by");
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          // Las teselas del mapa vienen de OpenStreetMap; las fotos del mercado, de la misma API.
+          "img-src": ["'self'", "data:", "blob:", "https://tile.openstreetmap.org"],
+        },
+      },
+    }),
+  );
   app.use(cors({ origin: config.corsOrigin }));
   // Publicar en el mercado incluye hasta 4 fotos en base64; el resto de la API mantiene el límite chico.
   app.use("/api/mercado", express.json({ limit: "4mb" }));
@@ -37,6 +48,15 @@ export function crearApp(db: Db) {
   app.use("/api/impacto", rutasImpacto(db));
   app.use("/api/mercado", rutasMercado(db));
   app.use("/api/conversaciones", rutasConversaciones(db));
+
+  // En producción la misma API entrega la web compilada (ver config.webDist).
+  if (existsSync(join(config.webDist, "index.html"))) {
+    app.use(express.static(config.webDist, { index: false, maxAge: "1h" }));
+    // Rutas de la web (/donar, /mercado/123…): siempre index.html y React Router decide qué mostrar.
+    app.get(/^(?!\/api(\/|$)).*/, (_req, res) => {
+      res.sendFile(join(config.webDist, "index.html"));
+    });
+  }
 
   app.use(rutaNoEncontrada);
   app.use(manejadorErrores);

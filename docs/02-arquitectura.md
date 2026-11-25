@@ -110,13 +110,12 @@ sequenceDiagram
 
 ## 6. Despliegue propuesto
 
-| Componente | Opción gratuita sugerida |
+| Componente | Servicio |
 |---|---|
-| Frontend (archivos estáticos) | Netlify, Vercel o GitHub Pages |
-| API (Node.js) | Render o Railway |
-| PostgreSQL administrado | Neon o Supabase (capa gratuita) |
+| API + web compilada (un solo servicio) | Render, plan gratuito ([`render.yaml`](../render.yaml)) |
+| PostgreSQL administrado | Neon, plan gratuito |
 
-La API cambia de PGlite a PostgreSQL definiendo una sola variable, `DATABASE_URL`. Las mismas migraciones corren en ambos motores.
+La API sirve también la web compilada, así todo queda en una sola URL y no hay que configurar CORS. Pasa de PGlite a PostgreSQL definiendo una sola variable, `DATABASE_URL`, y las mismas migraciones corren en ambos motores. Los pasos están en [10-despliegue.md](10-despliegue.md).
 
 ## 7. Registro de decisiones
 

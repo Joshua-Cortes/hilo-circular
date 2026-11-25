@@ -136,7 +136,8 @@ const OFICIOS_DEMO = [
     ],
   },
   {
-    emailCuenta: "bastianpizarrogarate@gmail.com",
+    // Correo ficticio a propósito: la clave demo es pública (README) y estos datos se cargan en producción.
+    emailCuenta: "airclean@demo.hilocircular.cl",
     nombreCuenta: "Bastián Pizarro · AirClean",
     conAccesoClaveDemo: true,
     nombrePublico: "AirClean · Restauración de Calzado",
