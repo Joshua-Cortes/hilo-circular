@@ -394,6 +394,11 @@ export const api = {
 
   misDonaciones: () => pedir<DonacionFundacion[]>("/donaciones/mias"),
 
+  cancelarDonacion: (id: string) =>
+    pedir<Omit<DonacionFundacion, "fundacion">>(`/donaciones/${encodeURIComponent(id)}/cancelacion`, {
+      method: "PATCH",
+    }),
+
   confirmarRecepcion: (id: string) =>
     pedir<Omit<DonacionFundacion, "fundacion">>(`/donaciones/${encodeURIComponent(id)}/recepcion`, { method: "PATCH" }),
 

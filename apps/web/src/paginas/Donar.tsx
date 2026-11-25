@@ -434,7 +434,20 @@ function AvisoDonacion({
     return (
       <p role="status" className="rounded-2xl bg-lima px-4 py-3 font-bold">
         ¡Listo! Registramos {listo.totalPrendas} {listo.totalPrendas === 1 ? "prenda" : "prendas"} (~{listo.kgEstimados}{" "}
-        kg). Cuando la fundación confirme que la recibió, sumará al impacto.
+        kg). Cuando la fundación confirme que la recibió, sumará al impacto.{" "}
+        <Link to="/mis-donaciones" className="underline underline-offset-4">
+          Ver mis donaciones
+        </Link>
+      </p>
+    );
+  }
+  if (usuario && usuario.rol !== "persona" && usuario.rol !== "oficio") {
+    return (
+      <p className="rounded-2xl bg-fondo px-4 py-3 text-sm">
+        Las cuentas de fundación reciben donaciones, no las registran.{" "}
+        <Link to="/mi-fundacion" className="font-bold underline underline-offset-4">
+          Ir a mi panel
+        </Link>
       </p>
     );
   }

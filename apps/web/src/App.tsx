@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from "react";
 import { Link, Route, Routes, useLocation } from "react-router";
-import { CifrasImpacto } from "./componentes/CifrasImpacto";
 import { EncabezadoPagina } from "./componentes/EncabezadoPagina";
+import { ImpactoPorCamino } from "./componentes/ImpactoPorCamino";
 import { Marco } from "./componentes/Marco";
 import { RequiereSesion } from "./componentes/RequiereSesion";
 import { Ingresar } from "./paginas/Ingresar";
@@ -18,6 +18,7 @@ const DetallePublicacion = lazy(() =>
   import("./paginas/DetallePublicacion").then((m) => ({ default: m.DetallePublicacion })),
 );
 const Publicar = lazy(() => import("./paginas/Publicar").then((m) => ({ default: m.Publicar })));
+const MisDonaciones = lazy(() => import("./paginas/MisDonaciones").then((m) => ({ default: m.MisDonaciones })));
 const MisPublicaciones = lazy(() =>
   import("./paginas/MisPublicaciones").then((m) => ({ default: m.MisPublicaciones })),
 );
@@ -54,10 +55,10 @@ function PaginaImpacto() {
           </>
         }
       >
-        Indicadores públicos y en vivo. Los kilos se estiman con el peso promedio de cada prenda y solo cuentan
-        donaciones que la fundación confirmó haber recibido.
+        Indicadores públicos y en vivo, una cifra principal por cada camino. Se calculan con lo que pasa en la
+        plataforma: nadie los escribe a mano.
       </EncabezadoPagina>
-      <CifrasImpacto />
+      <ImpactoPorCamino />
     </section>
   );
 }
@@ -112,6 +113,14 @@ export function App() {
             element={
               <RequiereSesion>
                 <MisPublicaciones />
+              </RequiereSesion>
+            }
+          />
+          <Route
+            path="/mis-donaciones"
+            element={
+              <RequiereSesion>
+                <MisDonaciones />
               </RequiereSesion>
             }
           />

@@ -64,7 +64,8 @@ export function Ingresar() {
       const sesion =
         modo === "registro" ? await api.registro({ nombre, email, clave, rol }) : await api.ingreso({ email, clave });
       iniciar(sesion);
-      navegar(volver, { replace: true });
+      // Un oficio recién registrado no tiene nada que hacer en el inicio: va directo a publicar su taller.
+      navegar(modo === "registro" && rol === "oficio" && volver === "/" ? "/mi-taller" : volver, { replace: true });
     } catch (err) {
       if (err instanceof ErrorApi && err.detalles.length > 0) {
         setErrores(Object.fromEntries(err.detalles.map((d) => [d.campo, d.mensaje])));

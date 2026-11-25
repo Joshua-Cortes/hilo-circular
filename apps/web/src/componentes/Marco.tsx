@@ -1,4 +1,16 @@
-import { HeartHandshake, LogOut, Menu, MessageCircle, Plus, Settings, Store, User, Wrench, X } from "lucide-react";
+import {
+  HandHeart,
+  HeartHandshake,
+  LogOut,
+  Menu,
+  MessageCircle,
+  Plus,
+  Settings,
+  Store,
+  User,
+  Wrench,
+  X,
+} from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router";
 import { cn } from "../lib/cn";
@@ -90,6 +102,11 @@ function MenuCuenta() {
           <Link role="menuitem" to="/mercado/mias" className={opcion} onClick={() => setAbierto(false)}>
             <Store className="size-5 text-hoja-oscura" aria-hidden="true" /> Mis publicaciones
           </Link>
+          {(usuario.rol === "persona" || usuario.rol === "oficio") && (
+            <Link role="menuitem" to="/mis-donaciones" className={opcion} onClick={() => setAbierto(false)}>
+              <HandHeart className="size-5 text-hoja-oscura" aria-hidden="true" /> Mis donaciones
+            </Link>
+          )}
           {usuario.rol === "oficio" && (
             <Link role="menuitem" to="/mi-taller" className={opcion} onClick={() => setAbierto(false)}>
               <Wrench className="size-5 text-hoja-oscura" aria-hidden="true" /> Mi taller
