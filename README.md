@@ -31,6 +31,7 @@ En 2021 llegaron a Chile cerca de 156 mil toneladas de ropa usada y alrededor de
 | [09 · Consentimiento y onboarding](docs/09-consentimiento-y-onboarding.md) | Plantilla de consentimiento informado y ficha de acompañamiento presencial (#14) |
 | [Mockup CU1 y CU3 · Oficios](docs/mockups/oficios.html) | Mockup interactivo de búsqueda, perfil y creación de oficio |
 | [Mockup CU2 · Donar](docs/mockups/donar.html) | Mockup interactivo de alta fidelidad (se abre en el navegador) |
+| [10 · Despliegue](docs/10-despliegue.md) | Cómo publicar la app con Neon y Render, paso a paso |
 | [Entregas](docs/entregas/) | Presentaciones y documentos entregados en cada hito |
 
 ## Cómo levantar el proyecto
@@ -42,7 +43,7 @@ npm install          # instala todo el monorepo
 npm run dev          # API en http://localhost:3000/api y web en http://localhost:5173
 ```
 
-En desarrollo la API crea la base local y carga los datos demo de La Serena y Coquimbo al arrancar (solo lo que falte). Para probar sin registrarte usa la **cuenta demo**: `demo@hilocircular.cl` / `hilo2026`. Hay otra con rol de oficio para probar "Mi taller": `taller@hilocircular.cl` / `hilo2026`, y una de fundación para el panel que confirma donaciones: `fundacion@hilocircular.cl` / `hilo2026`. Son cuentas ficticias que no existen en producción.
+En desarrollo la API crea la base local y carga los datos demo de La Serena y Coquimbo al arrancar (solo lo que falte). Para probar sin registrarte usa la **cuenta demo**: `demo@hilocircular.cl` / `hilo2026`. Hay otra con rol de oficio para probar "Mi taller": `taller@hilocircular.cl` / `hilo2026`, una de fundación para el panel que confirma donaciones: `fundacion@hilocircular.cl` / `hilo2026`, y la del taller AirClean, con su perfil ya publicado: `airclean@demo.hilocircular.cl` / `hilo2026`. Son cuentas ficticias que no existen en producción.
 
 | Comando | Qué hace |
 |---|---|

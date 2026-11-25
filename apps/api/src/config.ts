@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 if (existsSync(".env")) process.loadEnvFile(".env");
 
@@ -17,4 +18,11 @@ export const config = {
   pgliteDir: process.env.PGLITE_DIR ?? ".data/pglite",
   jwtSecret: process.env.JWT_SECRET ?? SECRETO_DESARROLLO,
   corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
+  /**
+   * Carpeta con la web ya compilada (`npm run build`). Si existe, la API también sirve la web y
+   * todo queda en una sola dirección: así `/api` funciona sin configurar CORS ni otra URL.
+   */
+  webDist: process.env.WEB_DIST ?? fileURLToPath(new URL("../../web/dist", import.meta.url)),
+  /** En producción los datos demo solo se cargan si se pide explícitamente (para la presentación). */
+  cargarDemo: process.env.CARGAR_DEMO === "true",
 };
