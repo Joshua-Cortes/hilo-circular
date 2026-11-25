@@ -42,7 +42,7 @@ npm install          # instala todo el monorepo
 npm run dev          # API en http://localhost:3000/api y web en http://localhost:5173
 ```
 
-En desarrollo la API crea la base local y carga los datos demo de La Serena y Coquimbo al arrancar (solo lo que falte). Para probar sin registrarte usa la **cuenta demo**: `demo@hilocircular.cl` / `hilo2026`. Hay otra con rol de oficio para probar "Mi taller": `taller@hilocircular.cl` / `hilo2026`. Son cuentas ficticias que no existen en producción.
+En desarrollo la API crea la base local y carga los datos demo de La Serena y Coquimbo al arrancar (solo lo que falte). Para probar sin registrarte usa la **cuenta demo**: `demo@hilocircular.cl` / `hilo2026`. Hay otra con rol de oficio para probar "Mi taller": `taller@hilocircular.cl` / `hilo2026`, y una de fundación para el panel que confirma donaciones: `fundacion@hilocircular.cl` / `hilo2026`. Son cuentas ficticias que no existen en producción.
 
 | Comando | Qué hace |
 |---|---|

@@ -75,6 +75,25 @@ describe("cuentas", () => {
     expect(sinAcceso.status).toBe(401);
   });
 
+  it("la fundación demo entra, ve su panel y tiene donaciones por confirmar", async () => {
+    const ingreso = await entorno
+      .api()
+      .post("/api/auth/ingreso")
+      .send({ email: "fundacion@hilocircular.cl", clave: CLAVE_DEMO });
+    expect(ingreso.body.datos.usuario.rol).toBe("fundacion");
+    const auth = { Authorization: `Bearer ${ingreso.body.datos.token}` };
+
+    const panel = await entorno.api().get("/api/fundaciones/yo").set(auth);
+    expect(panel.body.datos.nombre).toContain("Ropero Solidario");
+
+    const donaciones = await entorno.api().get("/api/donaciones/mias").set(auth);
+    const pendientes = donaciones.body.datos.filter((d: { estado: string }) => d.estado === "registrada");
+    expect(pendientes.length).toBeGreaterThan(0);
+
+    const confirmada = await entorno.api().patch(`/api/donaciones/${pendientes[0].id}/recepcion`).set(auth);
+    expect(confirmada.body.datos.estado).toBe("recibida");
+  });
+
   it("actualiza nombre y correo exigiendo la clave actual y verificando unicidad", async () => {
     const reg = await entorno
       .api()

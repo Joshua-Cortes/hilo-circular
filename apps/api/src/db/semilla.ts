@@ -1,12 +1,13 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { count, eq } from "drizzle-orm";
-import type { Rol } from "../lib/catalogo.js";
+import { and, count, eq } from "drizzle-orm";
+import { estimarKg, type Rol } from "../lib/catalogo.js";
 import { hashearClave } from "../lib/claves.js";
 import type { Db } from "./client.js";
 import {
   conversaciones,
+  donaciones,
   fotosPublicacion,
   fundaciones,
   type Horario,
@@ -488,7 +489,74 @@ export async function sembrar(db: Db): Promise<boolean> {
     sembro = true;
   }
 
+  if (await sembrarFundacionDemo(db)) {
+    sembro = true;
+  }
+
   return sembro;
+}
+
+/** Fundación con acceso para probar el panel (CU5): administra el Ropero Solidario de Las Compañías. */
+const FUNDACION_DEMO = {
+  email: "fundacion@hilocircular.cl",
+  nombre: "Ropero Solidario (demo)",
+  rol: "fundacion" as const,
+};
+const NOMBRE_FUNDACION_DEMO = "Ropero Solidario Las Compañías (demo)";
+
+/**
+ * Le da a la fundación demo una cuenta con la clave publicada y algunas donaciones de la cuenta
+ * demo@hilocircular.cl: dos por confirmar (para mostrar el flujo en vivo) y una ya recibida.
+ */
+async function sembrarFundacionDemo(db: Db): Promise<boolean> {
+  const [fundacion] = await db.select().from(fundaciones).where(eq(fundaciones.nombre, NOMBRE_FUNDACION_DEMO));
+  const [persona] = await db.select().from(usuarios).where(eq(usuarios.email, CUENTAS_DEMO[0].email));
+  if (!fundacion || !persona) return false;
+
+  const [existente] = await db.select().from(usuarios).where(eq(usuarios.email, FUNDACION_DEMO.email));
+  if (existente && fundacion.usuarioId === existente.id) return false;
+
+  const cuenta = existente ?? (await cuentaDemo(db, FUNDACION_DEMO, await hashearClave(CLAVE_DEMO)));
+  await db.update(fundaciones).set({ usuarioId: cuenta.id }).where(eq(fundaciones.id, fundacion.id));
+
+  const [{ n }] = await db
+    .select({ n: count() })
+    .from(donaciones)
+    .where(and(eq(donaciones.fundacionId, fundacion.id), eq(donaciones.donanteId, persona.id)));
+  if (n > 0) return true;
+
+  const ahora = Date.now();
+  const dias = (d: number) => new Date(ahora - d * 24 * 60 * 60 * 1000);
+  const ejemplos = [
+    {
+      items: [{ prenda: "uniforme_escolar" as const, cantidad: 3, estado: "buen_estado" as const }],
+      creadoEn: dias(1),
+    },
+    {
+      items: [
+        { prenda: "chaqueta_abrigo" as const, cantidad: 1, estado: "buen_estado" as const },
+        { prenda: "calzado" as const, cantidad: 2, estado: "buen_estado" as const },
+      ],
+      creadoEn: dias(0.2),
+    },
+    {
+      items: [{ prenda: "ropa_infantil" as const, cantidad: 6, estado: "buen_estado" as const }],
+      creadoEn: dias(6),
+      estado: "recibida" as const,
+      recibidaEn: dias(5),
+    },
+  ];
+  await db.insert(donaciones).values(
+    ejemplos.map(({ items, ...resto }) => ({
+      fundacionId: fundacion.id,
+      donanteId: persona.id,
+      items,
+      totalPrendas: items.reduce((total, item) => total + item.cantidad, 0),
+      kgEstimados: estimarKg(items),
+      ...resto,
+    })),
+  );
+  return true;
 }
 
 const DIRECTORIO_ACTUAL = dirname(fileURLToPath(import.meta.url));
