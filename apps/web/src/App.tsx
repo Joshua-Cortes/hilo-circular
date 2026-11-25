@@ -95,8 +95,7 @@ export function App() {
             path="/mi-fundacion"
             element={
               <RequiereSesion>
-                {" "}
-                <MiFundacion />{" "}
+                <MiFundacion />
               </RequiereSesion>
             }
           />

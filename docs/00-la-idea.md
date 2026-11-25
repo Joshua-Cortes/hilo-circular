@@ -71,8 +71,9 @@ Con `npm run dev` y la cuenta demo `demo@hilocircular.cl` / `hilo2026`:
 2. **Reparar:** filtrar por "Zapatería" y pulsar "Escribir por WhatsApp" (abre el mensaje ya escrito).
 3. **Donar:** marcar las 5 casillas del filtro; elegir un punto en el mapa y ver cómo la lista de la derecha se abre en ese punto. Mostrar "Reciclar textil" para la ropa que no pasa el filtro.
 4. **Mercado:** entrar con la cuenta demo, abrir la parka, enviar un mensaje por el chat y mostrar la conversación.
-5. **Publicar:** subir una prenda con foto desde el celular y marcarla como vendida.
-6. **Impacto:** cerrar con las cifras en vivo.
+5. **Fundación:** cerrar sesión y entrar con `fundacion@hilocircular.cl` / `hilo2026`. En "Mi fundación" pulsar "Ya la recibimos" en una donación pendiente: los kilos de impacto suben en vivo.
+6. **Publicar:** subir una prenda con foto desde el celular y marcarla como vendida.
+7. **Impacto:** cerrar con las cifras en vivo.
 
 ## Quién hace qué
 

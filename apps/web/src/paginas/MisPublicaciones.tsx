@@ -65,7 +65,7 @@ export function MisPublicaciones() {
         {lista && lista.length > 0 && (
           <ul className="grid gap-3 md:grid-cols-2">
             {lista.map((p) => (
-              <li key={p.id}>
+              <li key={p.id} className="min-w-0">
                 <Link
                   to={`/mercado/${p.id}`}
                   className="flex gap-4 rounded-tarjeta bg-superficie p-3 transition-colors hover:bg-menta-clara"
